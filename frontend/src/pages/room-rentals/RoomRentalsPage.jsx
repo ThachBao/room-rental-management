@@ -241,7 +241,7 @@ export default function RoomRentalsPage() {
                   <Edit2 size={13} />
                   Sửa
                 </Button>
-                {rental.status === RENTAL_STATUS.ACTIVE && (
+                {(rental.status === RENTAL_STATUS.ACTIVE || rental.status === RENTAL_STATUS.EXPIRED) && (
                   <Button
                     variant="danger"
                     size="sm"
