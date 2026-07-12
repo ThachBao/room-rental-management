@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Input from '../../components/common/Input';
+import ProvinceInput from '../../components/common/ProvinceInput';
 import Button from '../../components/common/Button';
 import { validateRequired, validatePhone } from '../../utils/validateForm';
 
@@ -106,7 +107,7 @@ export default function TenantForm({ initialData, onSubmit, onCancel }) {
           value={formData.dateOfBirth}
           onChange={handleChange}
         />
-        <Input
+        <ProvinceInput
           label="Quê quán / Hộ khẩu"
           name="address"
           value={formData.address}

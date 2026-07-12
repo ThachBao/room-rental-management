@@ -589,3 +589,33 @@
     border-radius: var(--radius-lg);
   }
 }
+
+/* ─── Province Autocomplete Dropdown ─── */
+.province-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 999;
+  margin-top: 4px;
+}
+
+.province-dropdown-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: var(--fs-base);
+  color: var(--text-main);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.province-dropdown-item:hover,
+.province-dropdown-item.focused {
+  background-color: var(--primary-light);
+  color: var(--primary-hover);
+}

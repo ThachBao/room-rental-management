@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { tenantApi } from '../../api/tenantApi';
 import Input from '../../components/common/Input';
+import ProvinceInput from '../../components/common/ProvinceInput';
 import Button from '../../components/common/Button';
 import Card from '../../components/common/Card';
 import Loading from '../../components/common/Loading';
@@ -185,7 +186,7 @@ export default function TenantProfilePage() {
               value={formData.dateOfBirth}
               onChange={handleChange}
             />
-            <Input
+            <ProvinceInput
               label="Quê quán / Thường trú"
               name="address"
               value={formData.address}
