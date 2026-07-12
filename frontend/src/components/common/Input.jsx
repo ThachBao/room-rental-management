@@ -28,19 +28,10 @@ export default function Input({ label, type = 'text', name, value, onChange, pla
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            style={{
-              position: 'absolute',
-              right: '12px',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-muted)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 0,
-              outline: 'none',
-            }}
+            disabled={disabled}
+            className="password-toggle-btn"
+            aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'}
+            title={showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
