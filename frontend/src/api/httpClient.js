@@ -46,10 +46,21 @@ const getHeaders = (extraHeaders = {}) => {
   return headers;
 };
 
+const getFullUrl = (url) => {
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  if (!baseUrl) return url;
+  const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${cleanBase}${cleanUrl}`;
+};
+
 export const httpClient = {
   get: async (url) => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(getFullUrl(url), {
         headers: getHeaders(),
       });
       return await handleResponse(response);
@@ -60,7 +71,7 @@ export const httpClient = {
 
   post: async (url, body) => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(getFullUrl(url), {
         method: 'POST',
         headers: getHeaders({
           'Content-Type': 'application/json',
@@ -75,7 +86,7 @@ export const httpClient = {
 
   put: async (url, body) => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(getFullUrl(url), {
         method: 'PUT',
         headers: getHeaders({
           'Content-Type': 'application/json',
@@ -90,7 +101,7 @@ export const httpClient = {
 
   delete: async (url) => {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(getFullUrl(url), {
         method: 'DELETE',
         headers: getHeaders(),
       });

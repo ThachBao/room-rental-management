@@ -9,7 +9,11 @@ export const uploadApi = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch('/api/upload', {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const url = baseUrl ? `${cleanBase}/api/upload` : '/api/upload';
+
+    const response = await fetch(url, {
       method: 'POST',
       headers,
       body: formData,
