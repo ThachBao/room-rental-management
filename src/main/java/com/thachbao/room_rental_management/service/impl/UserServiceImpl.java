@@ -64,6 +64,15 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("Số điện thoại này đã được sử dụng");
         }
 
+        // Role restriction check for creating LANDLORD accounts
+        if (request.getUserRole() == com.thachbao.room_rental_management.enums.UserRole.LANDLORD) {
+            String currentUserPhone = com.thachbao.room_rental_management.security.SecurityUtils.getCurrentUserPhone()
+                    .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin tài khoản đang đăng nhập"));
+            if (!currentUserPhone.equals(rootPhone)) {
+                throw new BadRequestException("Chỉ tài khoản Quản trị viên tối cao (Root Account) mới được quyền tạo tài khoản Quản trị viên khác.");
+            }
+        }
+
         User user = User.builder()
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
@@ -93,12 +102,35 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản có id = " + id));
 
+        String currentUserPhone = com.thachbao.room_rental_management.security.SecurityUtils.getCurrentUserPhone()
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin tài khoản đang đăng nhập"));
+        
+        boolean isCurrentUserRoot = currentUserPhone.equals(rootPhone);
+
+        // 1. Prevent non-root from editing Root Account
         if (user.getPhone() != null && user.getPhone().equals(rootPhone)) {
+            if (!isCurrentUserRoot) {
+                throw new BadRequestException("Bạn không có quyền chỉnh sửa tài khoản Quản trị viên tối cao (Root Account)");
+            }
             if (request.getEnabled() != null && !request.getEnabled()) {
                 throw new BadRequestException("Không thể khóa tài khoản Quản trị viên tối cao (Root Account)");
             }
             if (request.getUserRole() != null && request.getUserRole() != com.thachbao.room_rental_management.enums.UserRole.LANDLORD) {
                 throw new BadRequestException("Không thể thay đổi vai trò của tài khoản Quản trị viên tối cao (Root Account)");
+            }
+        }
+
+        // 2. Prevent non-root from editing other Landlords (Managers)
+        if (user.getUserRole() == com.thachbao.room_rental_management.enums.UserRole.LANDLORD && !user.getPhone().equals(currentUserPhone)) {
+            if (!isCurrentUserRoot) {
+                throw new BadRequestException("Bạn không có quyền chỉnh sửa tài khoản Quản trị viên khác");
+            }
+        }
+
+        // 3. Prevent non-root from promoting a user to LANDLORD role
+        if (request.getUserRole() == com.thachbao.room_rental_management.enums.UserRole.LANDLORD && user.getUserRole() != com.thachbao.room_rental_management.enums.UserRole.LANDLORD) {
+            if (!isCurrentUserRoot) {
+                throw new BadRequestException("Chỉ tài khoản Quản trị viên tối cao (Root Account) mới có quyền cấp quyền Quản trị viên.");
             }
         }
 
@@ -148,6 +180,16 @@ public class UserServiceImpl implements UserService {
         if (user.getPhone() != null && user.getPhone().equals(rootPhone)) {
             throw new BadRequestException("Không thể xóa tài khoản Quản trị viên tối cao (Root Account)");
         }
+
+        String currentUserPhone = com.thachbao.room_rental_management.security.SecurityUtils.getCurrentUserPhone()
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin tài khoản đang đăng nhập"));
+        
+        if (user.getUserRole() == com.thachbao.room_rental_management.enums.UserRole.LANDLORD) {
+            if (!currentUserPhone.equals(rootPhone)) {
+                throw new BadRequestException("Bạn không có quyền xóa tài khoản Quản trị viên khác");
+            }
+        }
+
         userRepository.delete(user);
     }
 
@@ -159,6 +201,16 @@ public class UserServiceImpl implements UserService {
         if (user.getPhone() != null && user.getPhone().equals(rootPhone)) {
             throw new BadRequestException("Không thể khóa tài khoản Quản trị viên tối cao (Root Account)");
         }
+
+        String currentUserPhone = com.thachbao.room_rental_management.security.SecurityUtils.getCurrentUserPhone()
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin tài khoản đang đăng nhập"));
+        
+        if (user.getUserRole() == com.thachbao.room_rental_management.enums.UserRole.LANDLORD) {
+            if (!currentUserPhone.equals(rootPhone)) {
+                throw new BadRequestException("Bạn không có quyền khóa/mở khóa tài khoản Quản trị viên khác");
+            }
+        }
+
         user.setEnabled(!user.isEnabled());
         user = userRepository.save(user);
         return userMapper.toResponse(user);

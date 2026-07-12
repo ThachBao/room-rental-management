@@ -23,6 +23,10 @@ export default function UsersPage() {
   // Toast notifications
   const [toast, setToast] = useState(null);
 
+  const currentAdminId = localStorage.getItem('adminId');
+  const currentUser = users.find(u => String(u.id) === currentAdminId);
+  const isCurrentUserRoot = currentUser ? !!currentUser.root : false;
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
   };
@@ -126,14 +130,18 @@ export default function UsersPage() {
       header: 'Thao tác',
       key: 'actions',
       render: (row) => {
-        const currentAdminId = localStorage.getItem('adminId');
         const isSelf = String(row.id) === currentAdminId;
         const isRoot = !!row.root;
+
+        const canEdit = isCurrentUserRoot || isSelf || row.userRole !== 'LANDLORD';
+        const canDeleteOrLock = !isSelf && !isRoot && (isCurrentUserRoot || row.userRole !== 'LANDLORD');
         
         return (
           <div className="table-actions">
-            <Button variant="secondary" size="sm" onClick={() => handleEditClick(row)}>Sửa</Button>
-            {!isSelf && !isRoot && (
+            {canEdit && (
+              <Button variant="secondary" size="sm" onClick={() => handleEditClick(row)}>Sửa</Button>
+            )}
+            {canDeleteOrLock && (
               <>
                 <Button
                   variant={row.enabled ? 'warning' : 'success'}
@@ -179,6 +187,7 @@ export default function UsersPage() {
       >
         <UserForm
           initialData={selectedUser}
+          isCurrentUserRoot={isCurrentUserRoot}
           onSubmit={handleFormSubmit}
           onCancel={() => setIsFormModalOpen(false)}
         />

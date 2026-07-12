@@ -9,7 +9,7 @@ const roleOptions = [
   { value: 'TENANT', label: 'Khách thuê phòng' },
 ];
 
-export default function UserForm({ initialData, onSubmit, onCancel }) {
+export default function UserForm({ initialData, onSubmit, onCancel, isCurrentUserRoot }) {
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -103,6 +103,7 @@ export default function UserForm({ initialData, onSubmit, onCancel }) {
           onChange={handleChange}
           options={roleOptions}
           required
+          disabled={!isCurrentUserRoot}
         />
       </div>
       <Input
