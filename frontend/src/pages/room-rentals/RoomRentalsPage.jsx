@@ -45,20 +45,28 @@ export default function RoomRentalsPage() {
   // Toast notifications
   const [toast, setToast] = useState(null);
 
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-  };
-
   const fetchRentals = async () => {
     try {
       setLoading(true);
       const data = await roomRentalApi.getAll(filterStatus === 'ALL' ? null : filterStatus);
-      setRentals([...data].sort((a, b) => b.id - a.id));
+      
+      let filteredData = data;
+      if (filterStatus === RENTAL_STATUS.ACTIVE) {
+        filteredData = data.filter(r => r.status === RENTAL_STATUS.ACTIVE);
+      } else if (filterStatus === RENTAL_STATUS.EXPIRED) {
+        filteredData = data.filter(r => r.status === RENTAL_STATUS.EXPIRED);
+      }
+
+      setRentals([...filteredData].sort((a, b) => b.id - a.id));
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
   };
 
   useEffect(() => {

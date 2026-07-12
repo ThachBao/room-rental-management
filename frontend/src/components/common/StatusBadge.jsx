@@ -10,6 +10,7 @@ const STATUS_MAP = {
 
   // Rental
   ACTIVE: { label: 'Đang hiệu lực', variant: 'success' },
+  EXPIRED: { label: 'Hết hạn', variant: 'warning' },
   TERMINATED: { label: 'Đã kết thúc', variant: 'secondary' },
 
   // Invoice

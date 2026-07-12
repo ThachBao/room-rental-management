@@ -46,8 +46,9 @@ public class RoomRentalServiceImpl implements RoomRentalService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RoomRentalResponse> getAllRoomRentals(RentalStatus status) {
+        autoUpdateExpiredRentals();
         List<RoomRental> roomRentals;
 
         if (com.thachbao.room_rental_management.security.SecurityUtils.hasRole("ROLE_TENANT")) {
@@ -61,11 +62,15 @@ public class RoomRentalServiceImpl implements RoomRentalService {
             List<RentalMember> memberships = rentalMemberRepository.findByTenant_Id(tenant.getId());
             roomRentals = memberships.stream()
                     .map(RentalMember::getRental)
-                    .filter(rental -> status == null || rental.getStatus() == status)
+                    .filter(rental -> status == null || 
+                                     (status == RentalStatus.ACTIVE && (rental.getStatus() == RentalStatus.ACTIVE || rental.getStatus() == RentalStatus.EXPIRED)) ||
+                                     rental.getStatus() == status)
                     .collect(Collectors.toList());
         } else {
             if (status == null) {
                 roomRentals = roomRentalRepository.findAll();
+            } else if (status == RentalStatus.ACTIVE) {
+                roomRentals = roomRentalRepository.findByStatusIn(List.of(RentalStatus.ACTIVE, RentalStatus.EXPIRED));
             } else {
                 roomRentals = roomRentalRepository.findByStatus(status);
             }
@@ -77,8 +82,9 @@ public class RoomRentalServiceImpl implements RoomRentalService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public RoomRentalResponse getRoomRentalById(Long id) {
+        autoUpdateExpiredRentals();
         RoomRental roomRental = findRoomRentalById(id);
         if (com.thachbao.room_rental_management.security.SecurityUtils.hasRole("ROLE_TENANT")) {
             String phone = com.thachbao.room_rental_management.security.SecurityUtils.getCurrentUserPhone()
@@ -143,14 +149,22 @@ public class RoomRentalServiceImpl implements RoomRentalService {
     public RoomRentalResponse updateRoomRental(Long id, RoomRentalUpdateRequest request) {
         RoomRental roomRental = findRoomRentalById(id);
 
-        if (roomRental.getStatus() != RentalStatus.ACTIVE) {
-            throw new BadRequestException("Chỉ được cập nhật lượt thuê đang ACTIVE");
+        if (roomRental.getStatus() != RentalStatus.ACTIVE && roomRental.getStatus() != RentalStatus.EXPIRED) {
+            throw new BadRequestException("Chỉ được cập nhật lượt thuê đang ACTIVE hoặc EXPIRED");
         }
 
         validateRentalDate(request.getStartDate(), request.getExpectedEndDate());
         validateDepositPayment(request.getDepositAmount(), request.getDepositPaidAmount());
 
         roomRentalMapper.updateEntity(roomRental, request);
+
+        // Auto update status based on new expectedEndDate
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (request.getExpectedEndDate() == null || !request.getExpectedEndDate().isBefore(today)) {
+            roomRental.setStatus(RentalStatus.ACTIVE);
+        } else {
+            roomRental.setStatus(RentalStatus.EXPIRED);
+        }
 
         RoomRental updatedRoomRental = roomRentalRepository.save(roomRental);
 
@@ -162,8 +176,8 @@ public class RoomRentalServiceImpl implements RoomRentalService {
     public RoomRentalResponse terminateRoomRental(Long id, RoomRentalTerminateRequest request) {
         RoomRental roomRental = findRoomRentalById(id);
 
-        if (roomRental.getStatus() != RentalStatus.ACTIVE) {
-            throw new BadRequestException("Chỉ được kết thúc lượt thuê đang ACTIVE");
+        if (roomRental.getStatus() != RentalStatus.ACTIVE && roomRental.getStatus() != RentalStatus.EXPIRED) {
+            throw new BadRequestException("Chỉ được kết thúc lượt thuê đang ACTIVE hoặc EXPIRED");
         }
 
         if (request.getMoveOutDate().isBefore(roomRental.getStartDate())) {
@@ -216,6 +230,17 @@ public class RoomRentalServiceImpl implements RoomRentalService {
         RoomRental terminatedRoomRental = roomRentalRepository.save(roomRental);
 
         return roomRentalMapper.toResponse(terminatedRoomRental);
+    }
+
+    private void autoUpdateExpiredRentals() {
+        List<RoomRental> activeRentals = roomRentalRepository.findByStatus(RentalStatus.ACTIVE);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        for (RoomRental rental : activeRentals) {
+            if (rental.getExpectedEndDate() != null && rental.getExpectedEndDate().isBefore(today)) {
+                rental.setStatus(RentalStatus.EXPIRED);
+                roomRentalRepository.save(rental);
+            }
+        }
     }
 
     private RoomRental findRoomRentalById(Long id) {
