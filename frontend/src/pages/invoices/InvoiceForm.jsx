@@ -148,8 +148,8 @@ export default function InvoiceForm({ initialData, onSubmit, onCancel }) {
     if (!initialData && !validateRequired(formData.rentalId)) newErrors.rentalId = 'Vui lòng chọn hợp đồng thuê';
     if (!initialData && !validateRequired(formData.billingMonth)) newErrors.billingMonth = 'Tháng lập hóa đơn không được để trống';
     if (!validateRequired(formData.dueDate)) newErrors.dueDate = 'Hạn thanh toán là bắt buộc';
-    if (!validateRequired(formData.otherFee) || !validatePositiveNumber(formData.otherFee)) newErrors.otherFee = 'Chi phí phát sinh không hợp lệ';
-    if (!validateRequired(formData.discountAmount) || !validatePositiveNumber(formData.discountAmount)) newErrors.discountAmount = 'Số tiền giảm trừ không hợp lệ';
+    if (!validatePositiveNumber(formData.otherFee)) newErrors.otherFee = 'Chi phí phát sinh không hợp lệ';
+    if (!validatePositiveNumber(formData.discountAmount)) newErrors.discountAmount = 'Số tiền giảm trừ không hợp lệ';
 
     if (!initialData) {
       if (!validateRequired(formData.oldElectricNumber) || !validatePositiveNumber(formData.oldElectricNumber)) {
@@ -178,8 +178,8 @@ export default function InvoiceForm({ initialData, onSubmit, onCancel }) {
 
     const submitData = {
       dueDate: formData.dueDate,
-      otherFee: parseFloat(formData.otherFee),
-      discountAmount: parseFloat(formData.discountAmount),
+      otherFee: parseFloat(formData.otherFee || 0),
+      discountAmount: parseFloat(formData.discountAmount || 0),
       note: formData.note || null,
     };
 
@@ -253,7 +253,7 @@ export default function InvoiceForm({ initialData, onSubmit, onCancel }) {
               {/* Electricity readings */}
               <div className="responsive-grid-2" style={{ marginBottom: '8px' }}>
                 <Input
-                  label="Chỉ số ĐIỆN CŨ *"
+                  label="Chỉ số ĐIỆN CŨ"
                   name="oldElectricNumber"
                   type="number"
                   placeholder="Nhập số điện cũ"
@@ -263,7 +263,7 @@ export default function InvoiceForm({ initialData, onSubmit, onCancel }) {
                   required
                 />
                 <Input
-                  label="Chỉ số ĐIỆN MỚI *"
+                  label="Chỉ số ĐIỆN MỚI"
                   name="newElectricNumber"
                   type="number"
                   placeholder="Nhập số điện mới"
@@ -277,7 +277,7 @@ export default function InvoiceForm({ initialData, onSubmit, onCancel }) {
               {/* Water readings */}
               <div className="responsive-grid-2">
                 <Input
-                  label="Chỉ số NƯỚC CŨ *"
+                  label="Chỉ số NƯỚC CŨ"
                   name="oldWaterNumber"
                   type="number"
                   placeholder="Nhập số nước cũ"
@@ -287,7 +287,7 @@ export default function InvoiceForm({ initialData, onSubmit, onCancel }) {
                   required
                 />
                 <Input
-                  label="Chỉ số NƯỚC MỚI *"
+                  label="Chỉ số NƯỚC MỚI"
                   name="newWaterNumber"
                   type="number"
                   placeholder="Nhập số nước mới"
@@ -309,7 +309,6 @@ export default function InvoiceForm({ initialData, onSubmit, onCancel }) {
           type="number"
           value={formData.otherFee}
           onChange={handleChange}
-          required
           error={errors.otherFee}
         />
         <Input
@@ -318,7 +317,6 @@ export default function InvoiceForm({ initialData, onSubmit, onCancel }) {
           type="number"
           value={formData.discountAmount}
           onChange={handleChange}
-          required
           error={errors.discountAmount}
         />
       </div>
