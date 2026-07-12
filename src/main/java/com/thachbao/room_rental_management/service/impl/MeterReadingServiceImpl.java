@@ -90,8 +90,8 @@ public class MeterReadingServiceImpl implements MeterReadingService {
         RoomRental rental = roomRentalRepository.findById(request.getRentalId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lượt thuê phòng có id = " + request.getRentalId()));
 
-        if (rental.getStatus() != RentalStatus.ACTIVE) {
-            throw new BadRequestException("Lượt thuê phòng phải ở trạng thái ACTIVE mới được tạo chỉ số");
+        if (rental.getStatus() != RentalStatus.ACTIVE && rental.getStatus() != RentalStatus.EXPIRED) {
+            throw new BadRequestException("Lượt thuê phòng phải ở trạng thái ACTIVE hoặc EXPIRED mới được tạo chỉ số");
         }
 
         Room room = rental.getRoom();

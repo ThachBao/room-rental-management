@@ -36,7 +36,7 @@ public class RoomServiceImpl implements RoomService {
                 return List.of();
             }
             return rentalMemberRepository.findByTenant_Id(tenant.getId()).stream()
-                    .filter(m -> m.getRental().getStatus() == com.thachbao.room_rental_management.enums.RentalStatus.ACTIVE)
+                    .filter(m -> m.getRental().getStatus() == com.thachbao.room_rental_management.enums.RentalStatus.ACTIVE || m.getRental().getStatus() == com.thachbao.room_rental_management.enums.RentalStatus.EXPIRED)
                     .map(m -> m.getRental().getRoom())
                     .distinct()
                     .map(roomMapper::toResponse)
@@ -72,7 +72,7 @@ public class RoomServiceImpl implements RoomService {
             com.thachbao.room_rental_management.entity.Tenant tenant = tenantRepository.findByUser_Phone(phone)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ người thuê"));
             boolean isMember = rentalMemberRepository.findByTenant_Id(tenant.getId()).stream()
-                    .anyMatch(m -> m.getRental().getRoom().getId().equals(id) && m.getRental().getStatus() == com.thachbao.room_rental_management.enums.RentalStatus.ACTIVE);
+                    .anyMatch(m -> m.getRental().getRoom().getId().equals(id) && (m.getRental().getStatus() == com.thachbao.room_rental_management.enums.RentalStatus.ACTIVE || m.getRental().getStatus() == com.thachbao.room_rental_management.enums.RentalStatus.EXPIRED));
             if (!isMember) {
                 throw new BadRequestException("Bạn không có quyền truy cập thông tin phòng này");
             }
