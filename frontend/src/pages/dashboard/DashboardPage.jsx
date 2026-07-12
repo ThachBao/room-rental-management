@@ -10,7 +10,7 @@ import Loading from '../../components/common/Loading';
 import Card from '../../components/common/Card';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { formatCurrency } from '../../utils/formatCurrency';
-import { Home, Users, Key, AlertCircle, Wrench, DollarSign, Layers, DoorOpen, ClipboardList } from 'lucide-react';
+import { Home, Users, Key, AlertCircle, Wrench, DollarSign, Layers, DoorOpen, ClipboardList, UserCheck, FileText, Shield, CreditCard, Settings } from 'lucide-react';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -28,6 +28,16 @@ export default function DashboardPage() {
   const [error, setError] = useState(null);
 
   const adminName = localStorage.getItem('adminName') || 'Chủ trọ';
+
+  const menuLinks = [
+    { label: 'Quản lý người thuê', path: '/admin/tenants', icon: UserCheck, color: '#22c55e' },
+    { label: 'Yêu cầu báo hỏng', path: '/admin/maintenance', icon: Wrench, color: '#ef4444' },
+    { label: 'Thành viên phòng', path: '/admin/rental-members', icon: Users, color: '#3b82f6' },
+    { label: 'Hồ sơ hợp đồng', path: '/admin/contract-files', icon: FileText, color: '#8b5cf6' },
+    { label: 'Đơn giá dịch vụ', path: '/admin/utility-rates', icon: Shield, color: '#f59e0b' },
+    { label: 'Lịch sử thanh toán', path: '/admin/payments', icon: CreditCard, color: '#ec4899' },
+    { label: 'Quản lý tài khoản', path: '/admin/users', icon: Settings, color: '#64748b' },
+  ];
 
   useEffect(() => {
     async function loadDashboardData() {
@@ -114,7 +124,7 @@ export default function DashboardPage() {
           padding: 16px;
           border-radius: var(--radius-md);
           box-shadow: var(--shadow-sm);
-          margin-top: 8px;
+          margin-top: 16px;
         }
       `}</style>
 
@@ -225,6 +235,51 @@ export default function DashboardPage() {
         </div>
         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Xem ngay &rsaquo;</span>
       </div>
+
+      <Card title="Chức năng mở rộng">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {menuLinks.map((item, idx) => {
+            const IconComponent = item.icon;
+            return (
+              <div
+                key={idx}
+                onClick={() => navigate(item.path)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--bg-main)',
+                  cursor: 'pointer',
+                  transition: 'background-color var(--transition-fast)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eaeaea'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-main)'}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '8px',
+                      backgroundColor: `${item.color}20`,
+                      color: item.color,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <IconComponent size={20} />
+                  </div>
+                  <span style={{ fontSize: 'var(--fs-base)', fontWeight: 600 }}>{item.label}</span>
+                </div>
+                <span style={{ color: 'var(--text-light)', fontSize: '18px' }}>&rsaquo;</span>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
 
       <div className="dashboard-tip-card">
         <h4 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 6px 0', color: 'var(--dark)' }}>Quản lý chuyên nghiệp</h4>
