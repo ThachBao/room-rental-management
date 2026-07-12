@@ -50,7 +50,14 @@ const getFullUrl = (url) => {
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  let baseUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!baseUrl) {
+    if (import.meta.env.DEV) {
+      baseUrl = '';
+    } else {
+      baseUrl = 'https://room-rental-management-hnu4.onrender.com';
+    }
+  }
   if (!baseUrl) return url;
   const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
   const cleanUrl = url.startsWith('/') ? url : `/${url}`;
@@ -104,6 +111,22 @@ export const httpClient = {
       const response = await fetch(getFullUrl(url), {
         method: 'DELETE',
         headers: getHeaders(),
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  upload: async (url, file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(getFullUrl(url), {
+        method: 'POST',
+        headers: getHeaders(),
+        body: formData,
       });
       return await handleResponse(response);
     } catch (error) {
