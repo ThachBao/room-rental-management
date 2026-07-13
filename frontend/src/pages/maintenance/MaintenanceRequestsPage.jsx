@@ -16,8 +16,6 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDateTime } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { Plus, Edit2, Wrench, Play, CheckCircle2, User, Calendar, AlertTriangle } from 'lucide-react';
-import SortControl from '../../components/common/SortControl';
-import { sortData } from '../../utils/sortUtils';
 
 const filterStatusOptions = [
   { value: 'ALL', label: 'Tất cả trạng thái' },
@@ -38,13 +36,6 @@ export default function MaintenanceRequestsPage() {
   const initialStatus = location.state?.status || 'ALL';
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('id');
-  const [sortDirection, setSortDirection] = useState('desc');
-
-  const sortOptions = [
-    { value: 'id', label: 'Mới nhất' },
-    { value: 'createdAt', label: 'Ngày báo bảo trì' },
-  ];
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -72,15 +63,13 @@ export default function MaintenanceRequestsPage() {
       if (filters.priority !== 'ALL') queryFilters.priority = filters.priority;
 
       const data = await maintenanceApi.getAll(queryFilters);
-      setRequests(data);
+      setRequests([...data].sort((a, b) => b.id - a.id));
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
-
-  const sortedRequests = sortData(requests, sortBy, sortDirection);
 
   useEffect(() => {
     fetchRequests();
@@ -175,25 +164,18 @@ export default function MaintenanceRequestsPage() {
             options={priorityOptions}
           />
         </div>
-        <SortControl
-          sortBy={sortBy}
-          onSortByChange={setSortBy}
-          sortDirection={sortDirection}
-          onSortDirectionChange={setSortDirection}
-          options={sortOptions}
-        />
       </div>
 
       {loading ? (
         <Loading />
-      ) : sortedRequests.length === 0 ? (
+      ) : requests.length === 0 ? (
         <EmptyState
           message="Không tìm thấy yêu cầu sửa chữa nào."
           icon={Wrench}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {sortedRequests.map((request) => {
+          {requests.map((request) => {
             const isPending = request.status === MAINTENANCE_STATUS.PENDING;
             const isInProgress = request.status === MAINTENANCE_STATUS.IN_PROGRESS;
             

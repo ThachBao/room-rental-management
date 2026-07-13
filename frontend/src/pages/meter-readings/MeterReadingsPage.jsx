@@ -10,20 +10,11 @@ import Select from '../../components/common/Select';
 import MeterReadingForm from './MeterReadingForm';
 import Loading from '../../components/common/Loading';
 import { getErrorMessage } from '../../utils/errorHandler';
-import SortControl from '../../components/common/SortControl';
-import { sortData } from '../../utils/sortUtils';
 
 export default function MeterReadingsPage() {
   const [readings, setReadings] = useState([]);
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('id');
-  const [sortDirection, setSortDirection] = useState('desc');
-
-  const sortOptions = [
-    { value: 'id', label: 'Mới nhất' },
-    { value: 'billingMonth', label: 'Tháng chốt số' },
-  ];
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -59,15 +50,13 @@ export default function MeterReadingsPage() {
       if (filters.billingMonth) queryFilters.billingMonth = filters.billingMonth;
 
       const data = await meterReadingApi.getAll(queryFilters);
-      setReadings(data);
+      setReadings([...data].sort((a, b) => b.id - a.id));
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
-
-  const sortedReadings = sortData(readings, sortBy, sortDirection);
 
   useEffect(() => {
     fetchRentals();
@@ -156,29 +145,20 @@ export default function MeterReadingsPage() {
         onActionClick={handleCreateClick}
         actionLabel="Chốt số tháng mới"
       >
-        <div className="filter-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Select
-              name="rentalId"
-              value={filters.rentalId}
-              onChange={handleFilterChange}
-              options={rentalOptions}
-            />
-            <input
-              type="month"
-              name="billingMonth"
-              className="form-control"
-              value={filters.billingMonth}
-              onChange={handleFilterChange}
-              style={{ width: '160px', padding: '8px 12px' }}
-            />
-          </div>
-          <SortControl
-            sortBy={sortBy}
-            onSortByChange={setSortBy}
-            sortDirection={sortDirection}
-            onSortDirectionChange={setSortDirection}
-            options={sortOptions}
+        <div className="filter-group">
+          <Select
+            name="rentalId"
+            value={filters.rentalId}
+            onChange={handleFilterChange}
+            options={rentalOptions}
+          />
+          <input
+            type="month"
+            name="billingMonth"
+            className="form-control"
+            value={filters.billingMonth}
+            onChange={handleFilterChange}
+            style={{ width: '160px', padding: '8px 12px' }}
           />
         </div>
       </PageHeader>
@@ -188,7 +168,7 @@ export default function MeterReadingsPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={sortedReadings}
+          data={readings}
           emptyMessage="Không tìm thấy dữ liệu chốt số điện nước nào."
         />
       )}

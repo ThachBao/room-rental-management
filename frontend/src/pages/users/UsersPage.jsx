@@ -10,20 +10,10 @@ import Toast from '../../components/common/Toast';
 import UserForm from './UserForm';
 import Loading from '../../components/common/Loading';
 import { getErrorMessage } from '../../utils/errorHandler';
-import SortControl from '../../components/common/SortControl';
-import { sortData } from '../../utils/sortUtils';
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('id');
-  const [sortDirection, setSortDirection] = useState('desc');
-
-  const sortOptions = [
-    { value: 'id', label: 'Mới nhất' },
-    { value: 'fullName', label: 'Họ tên' },
-    { value: 'phone', label: 'Số điện thoại' },
-  ];
 
   // Modals & Dialogs state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -45,15 +35,13 @@ export default function UsersPage() {
     try {
       setLoading(true);
       const data = await userApi.getAll();
-      setUsers(data);
+      setUsers([...data].sort((a, b) => b.id - a.id));
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
-
-  const sortedUsers = sortData(users, sortBy, sortDirection);
 
   useEffect(() => {
     fetchUsers();
@@ -179,24 +167,14 @@ export default function UsersPage() {
         title="Quản Lý Tài Khoản Người Dùng"
         onActionClick={handleCreateClick}
         actionLabel="Thêm tài khoản"
-      >
-        <div className="filter-group">
-          <SortControl
-            sortBy={sortBy}
-            onSortByChange={setSortBy}
-            sortDirection={sortDirection}
-            onSortDirectionChange={setSortDirection}
-            options={sortOptions}
-          />
-        </div>
-      </PageHeader>
+      />
 
       {loading ? (
         <Loading />
       ) : (
         <DataTable
           columns={columns}
-          data={sortedUsers}
+          data={users}
           emptyMessage="Không tìm thấy tài khoản người dùng nào."
         />
       )}

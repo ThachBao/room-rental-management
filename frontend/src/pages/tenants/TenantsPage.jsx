@@ -14,22 +14,11 @@ import StatusBadge from '../../components/common/StatusBadge';
 import { formatDate } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { Plus, Edit2, Trash2, Search, User, Phone, IdCard, Home, Calendar, Eye, Shield, CheckCircle } from 'lucide-react';
-import SortControl from '../../components/common/SortControl';
-import { sortData } from '../../utils/sortUtils';
 
 export default function TenantsPage() {
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [sortBy, setSortBy] = useState('id');
-  const [sortDirection, setSortDirection] = useState('desc');
-
-  const sortOptions = [
-    { value: 'id', label: 'Mới nhất' },
-    { value: 'fullName', label: 'Họ và tên' },
-    { value: 'phone', label: 'Số điện thoại' },
-    { value: 'dateOfBirth', label: 'Ngày sinh' },
-  ];
   
   // Modals & Dialogs state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -53,15 +42,13 @@ export default function TenantsPage() {
     try {
       setLoading(true);
       const data = await tenantApi.getAll(searchKeyword.trim() ? searchKeyword : null);
-      setTenants(data);
+      setTenants([...data].sort((a, b) => b.id - a.id));
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
-
-  const sortedTenants = sortData(tenants, sortBy, sortDirection);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -165,26 +152,18 @@ export default function TenantsPage() {
           />
           <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
         </div>
-
-        <SortControl
-          sortBy={sortBy}
-          onSortByChange={setSortBy}
-          sortDirection={sortDirection}
-          onSortDirectionChange={setSortDirection}
-          options={sortOptions}
-        />
       </div>
 
       {loading ? (
         <Loading />
-      ) : sortedTenants.length === 0 ? (
+      ) : tenants.length === 0 ? (
         <EmptyState
           message="Không tìm thấy khách thuê trọ nào."
           icon={User}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {sortedTenants.map((tenant) => (
+          {tenants.map((tenant) => (
             <Card key={tenant.id} style={{ padding: '16px' }}>
               {/* Header: Name and avatar character */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>

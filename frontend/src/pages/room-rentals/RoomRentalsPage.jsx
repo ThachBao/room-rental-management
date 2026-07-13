@@ -17,8 +17,6 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { Plus, Edit2, LogOut, ClipboardList, User, Calendar, DollarSign, Eye, FileText, Download } from 'lucide-react';
-import SortControl from '../../components/common/SortControl';
-import { sortData } from '../../utils/sortUtils';
 
 const filterStatusOptions = [
   { value: 'ALL', label: 'Tất cả hợp đồng' },
@@ -31,16 +29,6 @@ export default function RoomRentalsPage() {
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState(RENTAL_STATUS.ACTIVE);
-  const [sortBy, setSortBy] = useState('id');
-  const [sortDirection, setSortDirection] = useState('desc');
-
-  const sortOptions = [
-    { value: 'id', label: 'Mới nhất' },
-    { value: 'monthlyRentPrice', label: 'Giá thuê thực tế' },
-    { value: 'startDate', label: 'Ngày bắt đầu thuê' },
-    { value: 'expectedEndDate', label: 'Ngày hết hạn hợp đồng' },
-    { value: 'depositAmount', label: 'Tiền đặt cọc' },
-  ];
 
   // Modals state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -69,15 +57,13 @@ export default function RoomRentalsPage() {
         filteredData = data.filter(r => r.status === RENTAL_STATUS.EXPIRED);
       }
 
-      setRentals(filteredData);
+      setRentals([...filteredData].sort((a, b) => b.id - a.id));
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
-
-  const sortedRentals = sortData(rentals, sortBy, sortDirection);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
@@ -194,25 +180,18 @@ export default function RoomRentalsPage() {
             );
           })}
         </div>
-        <SortControl
-          sortBy={sortBy}
-          onSortByChange={setSortBy}
-          sortDirection={sortDirection}
-          onSortDirectionChange={setSortDirection}
-          options={sortOptions}
-        />
       </div>
 
       {loading ? (
         <Loading />
-      ) : sortedRentals.length === 0 ? (
+      ) : rentals.length === 0 ? (
         <EmptyState
           message="Không tìm thấy lượt thuê phòng nào phù hợp."
           icon={ClipboardList}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {sortedRentals.map((rental) => (
+          {rentals.map((rental) => (
             <Card key={rental.id} style={{ padding: '16px' }}>
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
