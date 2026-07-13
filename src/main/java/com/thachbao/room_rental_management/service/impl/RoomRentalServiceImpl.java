@@ -263,8 +263,8 @@ public class RoomRentalServiceImpl implements RoomRentalService {
             throw new BadRequestException("Phòng hiện không ở trạng thái AVAILABLE nên không thể cho thuê");
         }
 
-        if (roomRentalRepository.existsByRoom_IdAndStatus(room.getId(), RentalStatus.ACTIVE)) {
-            throw new BadRequestException("Phòng này đã có lượt thuê đang ACTIVE");
+        if (roomRentalRepository.existsByRoom_IdAndStatusIn(room.getId(), List.of(RentalStatus.ACTIVE, RentalStatus.EXPIRED))) {
+            throw new BadRequestException("Phòng này đang có lượt thuê hoạt động hoặc hết hạn chưa quyết toán");
         }
     }
 

@@ -49,7 +49,7 @@ public class TenantServiceImpl implements TenantService {
             }
             return List.of(tenantMapper.toResponse(tenant));
         }
-        return tenantRepository.findAll()
+        return tenantRepository.findByIsDeletedFalse()
                 .stream()
                 .map(tenantMapper::toResponse)
                 .toList();
@@ -74,10 +74,10 @@ public class TenantServiceImpl implements TenantService {
          */
         Map<Long, Tenant> resultMap = new LinkedHashMap<>();
 
-        tenantRepository.findByFullNameContainingIgnoreCase(trimKeyword)
+        tenantRepository.findByFullNameContainingIgnoreCaseAndIsDeletedFalse(trimKeyword)
                 .forEach(tenant -> resultMap.put(tenant.getId(), tenant));
 
-        tenantRepository.findByPhoneContaining(trimKeyword)
+        tenantRepository.findByPhoneContainingAndIsDeletedFalse(trimKeyword)
                 .forEach(tenant -> resultMap.put(tenant.getId(), tenant));
 
         return resultMap.values()
@@ -175,7 +175,6 @@ public class TenantServiceImpl implements TenantService {
         return tenantMapper.toResponse(updatedTenant);
     }
 
-    /** Xoá  người thuê */
     @Override
     @Transactional
     public void deleteTenant(Long id){
@@ -188,14 +187,15 @@ public class TenantServiceImpl implements TenantService {
         if (tenantRepository.countMembersByTenantId(id) > 0) {
             throw new BadRequestException("Không thể xóa người thuê này vì họ đang là Thành viên ở cùng trong phòng trọ.");
         }
-        if (tenantRepository.countMaintenanceRequestsByTenantId(id) > 0) {
-            throw new BadRequestException("Không thể xóa người thuê này vì họ đã gửi yêu cầu báo hỏng sửa chữa.");
-        }
+
+        // Thực hiện xóa mềm
+        tenant.setDeleted(true);
+        tenantRepository.save(tenant);
 
         User linkedUser = tenant.getUser();
-        tenantRepository.delete(tenant);
         if (linkedUser != null) {
-            userRepository.delete(linkedUser);
+            linkedUser.setEnabled(false);
+            userRepository.save(linkedUser);
         }
     }
     /** Hàm phụ dùng lại nhiều lần.
@@ -203,8 +203,12 @@ public class TenantServiceImpl implements TenantService {
      - Nếu không có thì ném lỗi 404.
      */
     private Tenant findTenantById(Long id) {
-        return tenantRepository.findById(id)
+        Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người thuê có id = " + id ));
+        if (tenant.isDeleted()) {
+            throw new ResourceNotFoundException("Không tìm thấy người thuê có id = " + id );
+        }
+        return tenant;
     }
     /*
      * Kiểm tra CCCD khi tạo mới.

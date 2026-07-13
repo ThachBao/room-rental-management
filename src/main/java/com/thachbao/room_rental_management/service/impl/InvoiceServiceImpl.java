@@ -223,6 +223,17 @@ public class InvoiceServiceImpl implements InvoiceService {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn có id = " + id));
 
+        if (SecurityUtils.hasRole("ROLE_TENANT")) {
+            String phone = SecurityUtils.getCurrentUserPhone()
+                    .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin đăng nhập"));
+            Tenant tenant = tenantRepository.findByUser_Phone(phone)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ người thuê"));
+            boolean isMember = rentalMemberRepository.existsByRental_IdAndTenant_Id(invoice.getRental().getId(), tenant.getId());
+            if (!isMember) {
+                throw new BadRequestException("Bạn không có quyền xác nhận thanh toán cho hóa đơn này");
+            }
+        }
+
         if (invoice.getStatus() == InvoiceStatus.PAID) {
             throw new BadRequestException("Hóa đơn này đã được thanh toán rồi");
         }

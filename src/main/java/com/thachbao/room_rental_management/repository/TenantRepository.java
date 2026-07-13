@@ -56,10 +56,16 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
 
     Optional<Tenant> findByUser_Phone(String phone);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT COUNT(*) FROM room_rentals WHERE representative_tenant_id = :tenantId", nativeQuery = true)
+    List<Tenant> findByIsDeletedFalse();
+
+    List<Tenant> findByFullNameContainingIgnoreCaseAndIsDeletedFalse(String fullName);
+
+    List<Tenant> findByPhoneContainingAndIsDeletedFalse(String phone);
+
+    @org.springframework.data.jpa.repository.Query(value = "SELECT COUNT(*) FROM room_rentals WHERE representative_tenant_id = :tenantId AND status != 'TERMINATED'", nativeQuery = true)
     long countRentalsByTenantId(@org.springframework.data.repository.query.Param("tenantId") Long tenantId);
 
-    @org.springframework.data.jpa.repository.Query(value = "SELECT COUNT(*) FROM rental_members WHERE tenant_id = :tenantId", nativeQuery = true)
+    @org.springframework.data.jpa.repository.Query(value = "SELECT COUNT(*) FROM rental_members WHERE tenant_id = :tenantId AND move_out_date IS NULL", nativeQuery = true)
     long countMembersByTenantId(@org.springframework.data.repository.query.Param("tenantId") Long tenantId);
 
     @org.springframework.data.jpa.repository.Query(value = "SELECT COUNT(*) FROM maintenance_requests WHERE tenant_id = :tenantId", nativeQuery = true)

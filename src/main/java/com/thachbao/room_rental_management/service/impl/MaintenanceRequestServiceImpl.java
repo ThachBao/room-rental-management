@@ -104,6 +104,22 @@ public class MaintenanceRequestServiceImpl implements MaintenanceRequestService 
         RoomRental rental = roomRentalRepository.findById(request.getRentalId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lượt thuê phòng có id = " + request.getRentalId()));
 
+        if (com.thachbao.room_rental_management.security.SecurityUtils.hasRole("ROLE_TENANT")) {
+            String phone = com.thachbao.room_rental_management.security.SecurityUtils.getCurrentUserPhone()
+                    .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin đăng nhập"));
+            Tenant currentTenant = tenantRepository.findByUser_Phone(phone)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ người thuê"));
+            
+            if (!currentTenant.getId().equals(request.getTenantId())) {
+                throw new BadRequestException("ID khách thuê không khớp với tài khoản đang đăng nhập");
+            }
+            
+            boolean isMember = rentalMemberRepository.existsByRental_IdAndTenant_Id(request.getRentalId(), currentTenant.getId());
+            if (!isMember) {
+                throw new BadRequestException("Bạn không có quyền gửi yêu cầu báo hỏng cho phòng này");
+            }
+        }
+
         if (rental.getRoom() == null || !rental.getRoom().getId().equals(request.getRoomId())) {
             throw new BadRequestException("Phòng báo hỏng không khớp với phòng thuộc lượt thuê");
         }

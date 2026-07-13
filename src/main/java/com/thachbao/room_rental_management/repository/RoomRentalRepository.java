@@ -14,4 +14,6 @@ public interface RoomRentalRepository extends JpaRepository<RoomRental, Long> {
 
     /** Phòng này đã có lượt thuê ACTIVE chưa? */
     boolean existsByRoom_IdAndStatus(Long roomId, RentalStatus status);
+
+    boolean existsByRoom_IdAndStatusIn(Long roomId, List<RentalStatus> statuses);
 }
