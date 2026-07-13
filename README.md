@@ -34,7 +34,7 @@ Dự án được tổ chức theo kiến trúc phân tách rõ ràng giữa **B
 - Cung cấp giải pháp tính toán tiền điện, nước và dịch vụ tự động, chính xác, minh bạch.
 - Tăng cường khả năng giao tiếp và phản hồi thông tin giữa chủ trọ và khách thuê thông qua hệ thống báo lỗi cơ sở vật chất trực tuyến.
 - Quản lý tập trung thông tin hợp đồng thuê phòng, lịch sử thanh toán và tài liệu số (file hợp đồng, ảnh hóa đơn chuyển khoản).
-- Phân quyền rõ ràng và bảo mật tuyệt đối dữ liệu người dùng bằng JWT và Spring Security.
+- Xác thực và phân quyền truy cập bằng JWT kết hợp Spring Security.
 
 ---
 
@@ -70,7 +70,7 @@ Hệ thống được thiết kế theo mô hình Client-Server phân tách:
 
 ```text
        [ Client / Browser (React SPA) ]
-                      ↕  (REST API calls via Axios/Fetch with JWT)
+                      ↕  (REST API calls via Fetch API with JWT)
        [ Backend Server (Spring Boot REST API) ]
                       ↓
  [ Controller -> Service -> Repository -> JPA Entities ]
@@ -90,7 +90,7 @@ Hệ thống được thiết kế theo mô hình Client-Server phân tách:
 - **Framework:** Spring Boot 4.x
 - **Data Access:** Spring Data JPA (Hibernate)
 - **Security:** Spring Security & Java JWT (JJWT)
-- **API Testing:** Postman
+- **API Documentation:** Springdoc OpenAPI / Swagger UI
 - **Build tool:** Maven
 - **Khác:** Lombok, Spring Boot Starter Validation
 
@@ -113,17 +113,17 @@ Các bảng chính và các Class JPA Entities tương ứng trong hệ thống:
 
 | Tên Bảng | Thực Thể (Entity) | Mô tả |
 |---|---|---|
-| `users` | [User](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/User.java) | Thông tin tài khoản đăng nhập và vai trò (`LANDLORD`, `TENANT`) |
-| `rooms` | [Room](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/Room.java) | Danh sách phòng trọ, trạng thái (`AVAILABLE`, `OCCUPIED`, `MAINTENANCE`, `INACTIVE`) |
-| `tenants` | [Tenant](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/Tenant.java) | Hồ sơ cá nhân của khách thuê phòng đại diện |
-| `room_rentals` | [RoomRental](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/RoomRental.java) | Hợp đồng thuê phòng, thông tin tiền cọc và thời hạn |
-| `rental_members` | [RentalMember](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/RentalMember.java) | Danh sách người ở chung phòng trọ và vai trò (`REPRESENTATIVE`, `OCCUPANT`) |
-| `contract_files` | [ContractFile](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/ContractFile.java) | File tài liệu đính kèm hợp đồng (định dạng JPG, PNG, PDF) |
-| `rental_utility_rates` | [RentalUtilityRate](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/RentalUtilityRate.java) | Biểu giá dịch vụ tiện ích (điện, nước, internet, rác, gửi xe) áp dụng riêng từng phòng |
-| `meter_readings` | [MeterReading](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/MeterReading.java) | Ghi nhận chỉ số điện/nước hàng tháng của từng phòng |
-| `invoices` | [Invoice](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/Invoice.java) | Hóa đơn chi tiết hàng tháng và trạng thái (`UNPAID`, `PAID`, `OVERDUE`, `PENDING_APPROVAL`) |
-| `payments` | [Payment](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/Payment.java) | Biên nhận giao dịch thanh toán hóa đơn (các phương thức: `CASH`, `BANK_TRANSFER`, `MOMO`, `ZALOPAY`...) |
-| `maintenance_requests` | [MaintenanceRequest](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/java/com/thachbao/room_rental_management/entity/MaintenanceRequest.java) | Yêu cầu báo lỗi, sửa chữa cơ sở vật chất từ khách thuê |
+| `users` | [User](src/main/java/com/thachbao/room_rental_management/entity/User.java) | Thông tin tài khoản đăng nhập và vai trò (`LANDLORD`, `TENANT`) |
+| `rooms` | [Room](src/main/java/com/thachbao/room_rental_management/entity/Room.java) | Danh sách phòng trọ, trạng thái (`AVAILABLE`, `OCCUPIED`, `MAINTENANCE`, `INACTIVE`) |
+| `tenants` | [Tenant](src/main/java/com/thachbao/room_rental_management/entity/Tenant.java) | Hồ sơ cá nhân của khách thuê |
+| `room_rentals` | [RoomRental](src/main/java/com/thachbao/room_rental_management/entity/RoomRental.java) | Hợp đồng thuê phòng, thông tin tiền cọc và thời hạn |
+| `rental_members` | [RentalMember](src/main/java/com/thachbao/room_rental_management/entity/RentalMember.java) | Danh sách người ở chung phòng trọ và vai trò (`REPRESENTATIVE`, `OCCUPANT`) |
+| `contract_files` | [ContractFile](src/main/java/com/thachbao/room_rental_management/entity/ContractFile.java) | Metadata và URL tài liệu hợp đồng (JPG, PNG, PDF) lưu trên Cloudinary |
+| `rental_utility_rates` | [RentalUtilityRate](src/main/java/com/thachbao/room_rental_management/entity/RentalUtilityRate.java) | Biểu giá điện, nước, internet, rác và gửi xe theo lượt thuê |
+| `meter_readings` | [MeterReading](src/main/java/com/thachbao/room_rental_management/entity/MeterReading.java) | Chỉ số điện/nước hằng tháng của từng lượt thuê |
+| `invoices` | [Invoice](src/main/java/com/thachbao/room_rental_management/entity/Invoice.java) | Hóa đơn hằng tháng (`UNPAID`, `PAID`, `OVERDUE`, `PENDING_APPROVAL`) |
+| `payments` | [Payment](src/main/java/com/thachbao/room_rental_management/entity/Payment.java) | Giao dịch thanh toán (`CASH`, `BANK_TRANSFER`, `MOMO`, `ZALOPAY`, `OTHER`) |
+| `maintenance_requests` | [MaintenanceRequest](src/main/java/com/thachbao/room_rental_management/entity/MaintenanceRequest.java) | Yêu cầu sửa chữa từ khách thuê |
 
 ---
 
@@ -134,7 +134,7 @@ room-rental-management
 ├── frontend/
 │   ├── public/              # Tài nguyên tĩnh của React
 │   ├── src/
-│   │   ├── api/             # Cấu hình gọi API (Axios/Fetch)
+│   │   ├── api/             # Các hàm gọi REST API bằng Fetch API
 │   │   ├── assets/          # Logo, hình ảnh dùng trong giao diện
 │   │   ├── components/      # Các component tái sử dụng (Layout, Sidebar, Modal, v.v.)
 │   │   ├── constants/       # Định nghĩa hằng số, API endpoint
@@ -182,39 +182,47 @@ room-rental-management
 
 - **Mã hóa mật khẩu:** Mật khẩu người dùng được băm bằng thuật toán **BCrypt** trước khi lưu trữ vào cơ sở dữ liệu.
 - **Xác thực phi trạng thái (Stateless):** Client gửi token JWT qua HTTP Header `Authorization: Bearer <token>` mỗi khi gọi API.
-- **Phân quyền Route:** 
-  - Các endpoint quản trị (`/api/rooms/**`, `/api/tenants/**`, `/api/invoices/**`, v.v.) chỉ cho phép vai trò `LANDLORD` truy cập.
-  - Các endpoint gửi sự cố hoặc xem hóa đơn của phòng riêng (`/api/maintenance-requests/tenant/**`, v.v.) dành cho vai trò `TENANT`.
+- **Phân quyền API:** Các controller dùng `@PreAuthorize` để giới hạn thao tác quản trị cho `LANDLORD`; `TENANT` được đọc hoặc tạo dữ liệu thuộc phạm vi phòng/lượt thuê của mình. Service tiếp tục lọc dữ liệu theo người dùng hiện tại.
 - **JWT Filters:** Tự động lọc và giải mã token để thiết lập SecurityContext cho mỗi yêu cầu.
 
 ---
 
 ## ⚙️ Cấu hình môi trường
 
-Tệp cấu hình chính của Spring Boot là [application.properties](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/resources/application.properties). Tệp này sử dụng các biến môi trường để bảo mật thông tin kết nối. 
+Tệp cấu hình chính của Spring Boot là [application.properties](src/main/resources/application.properties). Ứng dụng đọc cấu hình nhạy cảm từ biến môi trường.
 
-Để chạy dự án ở môi trường phát triển (Local), bạn cần thiết lập các biến môi trường sau trên hệ thống của mình hoặc thay thế trực tiếp vào tệp cấu hình (lưu ý không commit file chứa mật khẩu thật lên Git):
+Để chạy dự án ở môi trường phát triển, thiết lập các biến môi trường sau (không commit thông tin bí mật lên Git):
 
 | Tên Biến Môi Trường | Mô Tả | Ví dụ cấu hình |
 |---|---|---|
 | `DB_URL` | Đường dẫn kết nối CSDL MySQL | `jdbc:mysql://localhost:3306/room_rental_management?useUnicode=true&characterEncoding=UTF-8` |
 | `DB_USERNAME` | Tài khoản MySQL | `root` |
 | `DB_PASSWORD` | Mật khẩu MySQL | `your_mysql_password` |
-| `PORT` | Cổng chạy server Backend | `8080` |
-| `ROOT_PHONE` | Số điện thoại Landlord mặc định | `0779637353` |
-| `JWT_SECRET` | Khóa bí mật dùng để ký token JWT | `2b7e151628aed2a6abf7158809cf4f3c2b7e151628aed2a6abf71588...` (Chuỗi Base64 dài) |
+| `PORT` | Cổng backend; không đặt sẽ dùng `8080` | `8080` |
+| `ROOT_PHONE` | Số điện thoại tài khoản chủ trọ có quyền quản trị cao nhất | `0779637353` |
+| `JWT_SECRET` | Khóa ký JWT mã hóa Base64, tối thiểu 256 bit sau khi giải mã | `your_base64_encoded_secret` |
 | `JWT_EXPIRATION` | Thời hạn của token JWT (mili-giây) | `86400000` (24 giờ) |
+| `CLOUDINARY_CLOUD_NAME` | Cloud name của tài khoản Cloudinary | `your_cloud_name` |
+| `CLOUDINARY_API_KEY` | API key của Cloudinary | `your_api_key` |
+| `CLOUDINARY_API_SECRET` | API secret của Cloudinary | `your_api_secret` |
 
 ---
 
 ## 🚀 Hướng dẫn cài đặt và chạy dự án
 
+Yêu cầu: Java 17, MySQL, Node.js/npm tương thích với Vite 8 và một tài khoản Cloudinary.
+
 ### 1. Khởi tạo Cơ sở dữ liệu
+
 - Khởi động máy chủ MySQL (mặc định tại cổng `3306`).
-- Chạy tệp SQL [room_rental_db.sql](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room_rental_db.sql) để khởi tạo cấu trúc cơ sở dữ liệu `room_rental_management` và nạp dữ liệu chạy thử ban đầu.
+- Tạo database, ví dụ: `CREATE DATABASE room_rental_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.
+- Tạo các bảng tương ứng với các JPA entity trước khi chạy backend. Cấu hình hiện tại dùng `spring.jpa.hibernate.ddl-auto=validate`, vì vậy Hibernate **chỉ kiểm tra schema, không tự tạo bảng**.
+- Có thể chạy [sample-data.sql](src/main/resources/db/sample-data.sql) sau khi đã có đủ bảng để nạp dữ liệu mẫu. Tệp này có lệnh `TRUNCATE`, không dùng trên database có dữ liệu cần giữ.
+
+> Lưu ý: repository hiện chưa có migration hoặc tệp SQL tạo schema hoàn chỉnh.
 
 ### 2. Thiết lập cấu hình Backend
-Sửa các biến môi trường tương ứng hoặc chỉnh sửa trực tiếp tệp [application.properties](file:///C:/Zalo%20Received%20Files/Du_an_ca_nhan/Room_Rental_Management/room-rental-management/src/main/resources/application.properties) theo kết nối MySQL cục bộ của bạn.
+Thiết lập đầy đủ các biến môi trường ở bảng trên. Không ghi thông tin thật trực tiếp vào [application.properties](src/main/resources/application.properties) rồi commit lên Git.
 
 ### 3. Khởi chạy máy chủ Backend (Spring Boot)
 Mở cửa sổ Terminal tại thư mục gốc của dự án và chạy:
@@ -240,7 +248,9 @@ Backend REST API sẽ chạy thành công tại địa chỉ: **`http://localhos
   npm run dev
   ```
 
-Frontend sẽ chạy thành công tại địa chỉ: **`http://localhost:5173`**
+Frontend chạy tại **`http://localhost:5173`**. Trong chế độ development, Vite proxy các request `/api` tới `http://localhost:8080`.
+
+Swagger UI của backend có tại **`http://localhost:8080/swagger-ui/index.html`** sau khi ứng dụng khởi động.
 
 ---
 
@@ -250,8 +260,8 @@ Hệ thống được thiết kế tối ưu, trực quan với các trang giao 
 
 | Trang giao diện | Đối tượng sử dụng | Chức năng |
 |---|---|---|
-| **Đăng nhập / Đăng ký** | Tất cả người dùng | Xác thực thông tin, phân quyền truy cập sau khi lấy token JWT |
-| **Dashboard Tổng quan** | Chủ trọ & Khách trọ | Hiển thị các chỉ số nhanh (số phòng trống, hóa đơn quá hạn, doanh thu tháng) |
+| **Đăng nhập chủ trọ / khách thuê** | Tất cả người dùng | Xác thực bằng số điện thoại và mật khẩu, sau đó phân luồng theo vai trò |
+| **Dashboard Tổng quan** | Chủ trọ & Khách trọ | Hiển thị thông tin tổng quan phù hợp với từng vai trò |
 | **Quản lý phòng trọ** | Chủ trọ | Danh sách các phòng, cập nhật trạng thái trống/đã thuê/bảo trì |
 | **Hợp đồng cho thuê** | Chủ trọ | Tạo hợp đồng thuê phòng, thiết lập tiền cọc, ngày bắt đầu và kết thúc |
 | **Thành viên phòng trọ** | Chủ trọ & Khách trọ | Theo dõi và quản lý những người đang cùng lưu trú trong một phòng trọ |
@@ -264,7 +274,7 @@ Hệ thống được thiết kế tối ưu, trực quan với các trang giao 
 
 ## 🧪 Kiểm thử (Testing)
 
-Bạn có thể chạy các bài kiểm thử tự động của hệ thống (bao gồm các test case cho JPA, Security, và Web MVC) bằng lệnh:
+Repository hiện có smoke test kiểm tra Spring Application Context. Chạy test backend bằng lệnh:
 
 ```bash
 mvn test
@@ -280,8 +290,8 @@ Hoặc dùng Maven Wrapper:
 
 Trước khi cấu hình đưa ứng dụng lên các nền tảng máy chủ VPS thực tế, hãy đảm bảo:
 
-1. **Thay đổi `JWT_SECRET`**: Đảm bảo sử dụng một chuỗi bí mật ngẫu nhiên, có độ dài tối thiểu 256-bit và bảo mật tuyệt đối.
-2. **Quyền ghi thư mục upload**: Kiểm tra và thiết lập quyền ghi (Write Permission) cho thư mục chứa các tệp tải lên (như ảnh biên lai hoặc PDF hợp đồng).
+1. **Thay đổi `JWT_SECRET`**: Dùng chuỗi Base64 ngẫu nhiên có ít nhất 256 bit sau khi giải mã và giữ bí mật khóa này.
+2. **Cloudinary**: Cấu hình ba biến môi trường Cloudinary; file upload được lưu trên Cloudinary, backend lưu URL an toàn trả về.
 3. **Cấu hình HTTPS**: Khi chạy thực tế, ứng dụng PWA yêu cầu kết nối an toàn HTTPS để có thể hoạt động ổn định và cho phép cài đặt lên thiết bị của người dùng.
 4. **Không công khai file bảo mật**: Tránh việc push tệp `.env` hoặc file `application.properties` chứa tài khoản DB thật lên các kho lưu trữ công cộng.
 
@@ -301,7 +311,7 @@ Trước khi cấu hình đưa ứng dụng lên các nền tảng máy chủ VP
 - Gửi thông báo tự động (qua email, Zalo ZNS hoặc Telegram) cho khách thuê khi đến kỳ đóng tiền hoặc khi chủ trọ cập nhật trạng thái sửa chữa.
 - Tích hợp thêm biểu đồ doanh thu và báo cáo phân tích tài chính chi tiết hơn cho chủ trọ.
 - Xây dựng thêm giao diện Mobile App native hoặc tối ưu hóa PWA sâu hơn để hỗ trợ thông báo đẩy (Push Notifications).
-- Sử dụng Docker để container hóa toàn bộ hệ thống giúp triển khai nhanh chóng.
+- Hoàn thiện Docker cho cả frontend, MySQL và Docker Compose; `Dockerfile` hiện tại chỉ build/chạy backend.
 
 ---
 
