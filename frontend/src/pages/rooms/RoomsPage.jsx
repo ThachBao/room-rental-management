@@ -54,7 +54,7 @@ export default function RoomsPage() {
         : (a.id - b.id) * direction;
     });
   }, [rooms, sortOrder]);
-  
+
   // Modals & Dialogs state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -66,7 +66,7 @@ export default function RoomsPage() {
   const [roomRentalDetail, setRoomRentalDetail] = useState(null);
   const [roomMembers, setRoomMembers] = useState([]);
   const [roomRates, setRoomRates] = useState(null);
-  
+
   // Toast notifications
   const [toast, setToast] = useState(null);
 
@@ -120,13 +120,13 @@ export default function RoomsPage() {
         const activeRental = activeRentals.find(r => r.roomId === room.id);
         if (activeRental) {
           setRoomRentalDetail(activeRental);
-          
+
           // 2. Fetch members and rates in parallel
           const [membersList, ratesList] = await Promise.all([
             rentalMemberApi.getAll(activeRental.id),
             utilityRateApi.getAll(activeRental.id)
           ]);
-          
+
           setRoomMembers(membersList.filter(m => !m.moveOutDate)); // Only show current members
           if (ratesList && ratesList.length > 0) {
             setRoomRates(ratesList[0]); // Get current active rate
@@ -211,8 +211,8 @@ export default function RoomsPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
           <span style={{ color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>Sắp xếp:</span>
           {[
-            { value: 'ASC', label: 'P01 → P05', icon: ArrowUp },
-            { value: 'DESC', label: 'P05 → P01', icon: ArrowDown },
+            { value: 'ASC', label: 'Tăng dần', icon: ArrowUp },
+            { value: 'DESC', label: 'Giảm dần', icon: ArrowDown },
           ].map((option) => {
             const isSelected = sortOrder === option.value;
             const SortIcon = option.icon;
