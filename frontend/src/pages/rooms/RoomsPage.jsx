@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { roomApi } from '../../api/roomApi';
 import { roomRentalApi } from '../../api/roomRentalApi';
@@ -17,7 +17,12 @@ import { ROOM_STATUS } from '../../constants/roomStatus';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
-import { Plus, Edit2, Trash2, Home, Users, Layers, Maximize, Eye, Calendar, Phone, DollarSign, Wrench } from 'lucide-react';
+import { Plus, Edit2, Trash2, Home, Users, Layers, Maximize, Eye, Calendar, Phone, DollarSign, Wrench, ArrowUp, ArrowDown } from 'lucide-react';
+
+const roomNumberCollator = new Intl.Collator('vi', {
+  numeric: true,
+  sensitivity: 'base',
+});
 
 const filterStatusOptions = [
   { value: 'ALL', label: 'Tất cả trạng thái' },
@@ -33,6 +38,22 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState(initialStatus);
+  const [sortOrder, setSortOrder] = useState('ASC');
+
+  const sortedRooms = useMemo(() => {
+    const direction = sortOrder === 'ASC' ? 1 : -1;
+
+    return [...rooms].sort((a, b) => {
+      const roomNumberComparison = roomNumberCollator.compare(
+        String(a.roomNumber ?? ''),
+        String(b.roomNumber ?? '')
+      );
+
+      return roomNumberComparison !== 0
+        ? roomNumberComparison * direction
+        : (a.id - b.id) * direction;
+    });
+  }, [rooms, sortOrder]);
   
   // Modals & Dialogs state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -57,7 +78,7 @@ export default function RoomsPage() {
     try {
       setLoading(true);
       const data = await roomApi.getAll(filterStatus === 'ALL' ? null : filterStatus);
-      setRooms([...data].sort((a, b) => b.id - a.id));
+      setRooms(data);
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
@@ -185,6 +206,46 @@ export default function RoomsPage() {
             );
           })}
         </div>
+
+        {/* Room number sort */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+          <span style={{ color: 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>Sắp xếp:</span>
+          {[
+            { value: 'ASC', label: 'P01 → P05', icon: ArrowUp },
+            { value: 'DESC', label: 'P05 → P01', icon: ArrowDown },
+          ].map((option) => {
+            const isSelected = sortOrder === option.value;
+            const SortIcon = option.icon;
+
+            return (
+              <button
+                key={option.value}
+                type={'button'}
+                aria-pressed={isSelected}
+                onClick={() => setSortOrder(option.value)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  padding: '6px 12px',
+                  borderRadius: 'var(--radius-full)',
+                  border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border-color)',
+                  backgroundColor: isSelected ? 'var(--primary-light)' : 'var(--light)',
+                  color: isSelected ? 'var(--primary-hover)' : 'var(--text-muted)',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                  transition: 'all var(--transition-fast)'
+                }}
+              >
+                <SortIcon size={13} />
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {loading ? (
@@ -196,7 +257,7 @@ export default function RoomsPage() {
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {rooms.map((room) => (
+          {sortedRooms.map((room) => (
             <Card key={room.id} style={{ padding: '16px' }}>
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
