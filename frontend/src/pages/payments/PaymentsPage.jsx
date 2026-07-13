@@ -13,12 +13,22 @@ import { formatPaymentMethod } from '../../constants/labels';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDateTime } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
+import SortControl from '../../components/common/SortControl';
+import { sortData } from '../../utils/sortUtils';
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterInvoiceId, setFilterInvoiceId] = useState('ALL');
+  const [sortBy, setSortBy] = useState('id');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const sortOptions = [
+    { value: 'id', label: 'Mới nhất' },
+    { value: 'paymentDate', label: 'Ngày thanh toán' },
+    { value: 'amount', label: 'Số tiền nộp' },
+  ];
 
   // Modals state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -46,13 +56,15 @@ export default function PaymentsPage() {
       if (filterInvoiceId !== 'ALL') queryFilters.invoiceId = filterInvoiceId;
       
       const data = await paymentApi.getAll(queryFilters);
-      setPayments([...data].sort((a, b) => b.id - a.id));
+      setPayments(data);
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  const sortedPayments = sortData(payments, sortBy, sortDirection);
 
   useEffect(() => {
     fetchInvoices();
@@ -99,12 +111,19 @@ export default function PaymentsPage() {
         onActionClick={handleCreateClick}
         actionLabel="Lập phiếu thu tiền"
       >
-        <div className="filter-group">
+        <div className="filter-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
           <Select
             name="filterInvoiceId"
             value={filterInvoiceId}
             onChange={(e) => setFilterInvoiceId(e.target.value)}
             options={invoiceOptions}
+          />
+          <SortControl
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            options={sortOptions}
           />
         </div>
       </PageHeader>
@@ -114,7 +133,7 @@ export default function PaymentsPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={payments}
+          data={sortedPayments}
           emptyMessage="Chưa ghi nhận phiếu thu tiền phòng nào."
         />
       )}

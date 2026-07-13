@@ -12,12 +12,22 @@ import Select from '../../components/common/Select';
 import ContractFileForm from './ContractFileForm';
 import Loading from '../../components/common/Loading';
 import { getErrorMessage } from '../../utils/errorHandler';
+import SortControl from '../../components/common/SortControl';
+import { sortData } from '../../utils/sortUtils';
 
 export default function ContractFilesPage() {
   const [files, setFiles] = useState([]);
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterRentalId, setFilterRentalId] = useState('ALL');
+  const [sortBy, setSortBy] = useState('id');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const sortOptions = [
+    { value: 'id', label: 'Mới nhất' },
+    { value: 'fileName', label: 'Tên tệp tin' },
+    { value: 'fileType', label: 'Loại định dạng' },
+  ];
 
   // Modals & Dialogs state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -44,13 +54,15 @@ export default function ContractFilesPage() {
     try {
       setLoading(true);
       const data = await contractFileApi.getAll(filterRentalId === 'ALL' ? null : filterRentalId);
-      setFiles([...data].sort((a, b) => b.id - a.id));
+      setFiles(data);
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  const sortedFiles = sortData(files, sortBy, sortDirection);
 
   useEffect(() => {
     fetchRentals();
@@ -149,12 +161,19 @@ export default function ContractFilesPage() {
         onActionClick={handleCreateClick}
         actionLabel="Đính kèm tài liệu"
       >
-        <div className="filter-group">
+        <div className="filter-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
           <Select
             name="filterRentalId"
             value={filterRentalId}
             onChange={(e) => setFilterRentalId(e.target.value)}
             options={rentalOptions}
+          />
+          <SortControl
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            options={sortOptions}
           />
         </div>
       </PageHeader>
@@ -164,7 +183,7 @@ export default function ContractFilesPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={files}
+          data={sortedFiles}
           emptyMessage="Không tìm thấy tệp hồ sơ đính kèm nào."
         />
       )}

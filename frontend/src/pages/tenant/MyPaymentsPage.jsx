@@ -10,11 +10,20 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDateTime } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { CreditCard, Calendar, User, FileText } from 'lucide-react';
+import SortControl from '../../components/common/SortControl';
+import { sortData } from '../../utils/sortUtils';
 
 export default function MyPaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [payments, setPayments] = useState([]);
+  const [sortBy, setSortBy] = useState('paymentDate');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const sortOptions = [
+    { value: 'paymentDate', label: 'Ngày thanh toán' },
+    { value: 'amount', label: 'Số tiền' },
+  ];
 
   useEffect(() => {
     async function loadTenantPayments() {
@@ -48,11 +57,8 @@ export default function MyPaymentsPage() {
           // 4. Filter payments matching the tenant's invoice IDs
           const tenantPayments = allPayments.filter(p => invoiceIds.includes(p.invoiceId));
           
-          // Sort by paymentDate descending
-          const sorted = [...tenantPayments].sort((a, b) => b.paymentDate.localeCompare(a.paymentDate));
-          
           // Attach billingMonth
-          const mapped = sorted.map(p => ({
+          const mapped = tenantPayments.map(p => ({
             ...p,
             billingMonth: invoiceMap[p.invoiceId] || ''
           }));
@@ -70,6 +76,8 @@ export default function MyPaymentsPage() {
     loadTenantPayments();
   }, []);
 
+  const sortedPayments = sortData(payments, sortBy, sortDirection);
+
   if (loading) return <Loading />;
 
   return (
@@ -80,14 +88,26 @@ export default function MyPaymentsPage() {
         </div>
       )}
 
-      {payments.length === 0 ? (
+      {payments.length > 0 && (
+        <div style={{ marginBottom: '12px' }}>
+          <SortControl
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            options={sortOptions}
+          />
+        </div>
+      )}
+
+      {sortedPayments.length === 0 ? (
         <EmptyState
           message="Hiện tại chưa ghi nhận giao dịch thanh toán nào."
           icon={CreditCard}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {payments.map((payment, idx) => (
+          {sortedPayments.map((payment, idx) => (
             <Card key={idx} style={{ padding: '16px' }}>
               {/* Card Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>

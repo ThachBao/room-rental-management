@@ -12,11 +12,21 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { FileText, Calendar, DollarSign, Eye } from 'lucide-react';
+import SortControl from '../../components/common/SortControl';
+import { sortData } from '../../utils/sortUtils';
 
 export default function MyInvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [invoices, setInvoices] = useState([]);
+  const [sortBy, setSortBy] = useState('billingMonth');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const sortOptions = [
+    { value: 'billingMonth', label: 'Tháng hóa đơn' },
+    { value: 'totalAmount', label: 'Tổng tiền' },
+    { value: 'id', label: 'Mới nhất' },
+  ];
   
   // Modal state
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -40,9 +50,7 @@ export default function MyInvoicesPage() {
 
       if (myActiveRental) {
         const invoicesList = await invoiceApi.getAll({ rentalId: myActiveRental.id });
-        // Sort by billingMonth descending
-        const sorted = [...invoicesList].sort((a, b) => b.billingMonth.localeCompare(a.billingMonth));
-        setInvoices(sorted);
+        setInvoices(invoicesList);
       } else {
         setInvoices([]);
       }
@@ -52,6 +60,8 @@ export default function MyInvoicesPage() {
       setLoading(false);
     }
   };
+
+  const sortedInvoices = sortData(invoices, sortBy, sortDirection);
 
   useEffect(() => {
     loadTenantInvoices();
@@ -72,14 +82,26 @@ export default function MyInvoicesPage() {
         </div>
       )}
 
-      {invoices.length === 0 ? (
+      {invoices.length > 0 && (
+        <div style={{ marginBottom: '12px' }}>
+          <SortControl
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            options={sortOptions}
+          />
+        </div>
+      )}
+
+      {sortedInvoices.length === 0 ? (
         <EmptyState
           message="Hiện tại chưa phát sinh hóa đơn tiền phòng nào."
           icon={FileText}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {invoices.map((invoice, idx) => (
+          {sortedInvoices.map((invoice, idx) => (
             <Card
               key={idx}
               onClick={() => handleDetailClick(invoice)}

@@ -11,12 +11,21 @@ import UtilityRateForm from './UtilityRateForm';
 import Loading from '../../components/common/Loading';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { getErrorMessage } from '../../utils/errorHandler';
+import SortControl from '../../components/common/SortControl';
+import { sortData } from '../../utils/sortUtils';
 
 export default function UtilityRatesPage() {
   const [rates, setRates] = useState([]);
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterRentalId, setFilterRentalId] = useState('ALL');
+  const [sortBy, setSortBy] = useState('id');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const sortOptions = [
+    { value: 'id', label: 'Mới nhất' },
+    { value: 'effectiveFromMonth', label: 'Tháng hiệu lực' },
+  ];
 
   // Modals state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -42,13 +51,15 @@ export default function UtilityRatesPage() {
     try {
       setLoading(true);
       const data = await utilityRateApi.getAll(filterRentalId === 'ALL' ? null : filterRentalId);
-      setRates([...data].sort((a, b) => b.id - a.id));
+      setRates(data);
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  const sortedRates = sortData(rates, sortBy, sortDirection);
 
   useEffect(() => {
     fetchRentals();
@@ -153,12 +164,19 @@ export default function UtilityRatesPage() {
         onActionClick={handleCreateClick}
         actionLabel="Cấu hình đơn giá"
       >
-        <div className="filter-group">
+        <div className="filter-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
           <Select
             name="filterRentalId"
             value={filterRentalId}
             onChange={(e) => setFilterRentalId(e.target.value)}
             options={rentalOptions}
+          />
+          <SortControl
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            options={sortOptions}
           />
         </div>
       </PageHeader>
@@ -168,7 +186,7 @@ export default function UtilityRatesPage() {
       ) : (
         <DataTable
           columns={columns}
-          data={rates}
+          data={sortedRates}
           emptyMessage="Không tìm thấy đơn giá dịch vụ nào."
         />
       )}

@@ -18,6 +18,8 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { Plus, Eye, Edit2, AlertTriangle, FileText, Calendar, User, DollarSign } from 'lucide-react';
+import SortControl from '../../components/common/SortControl';
+import { sortData } from '../../utils/sortUtils';
 
 const filterStatusOptions = [
   { value: 'ALL', label: 'Tất cả trạng thái' },
@@ -33,6 +35,15 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState([]);
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState('id');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const sortOptions = [
+    { value: 'id', label: 'Mới nhất' },
+    { value: 'billingMonth', label: 'Tháng hóa đơn' },
+    { value: 'totalAmount', label: 'Tổng tiền' },
+    { value: 'dueDate', label: 'Hạn thanh toán' },
+  ];
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -71,13 +82,15 @@ export default function InvoicesPage() {
       if (filters.billingMonth) queryFilters.billingMonth = filters.billingMonth;
 
       const data = await invoiceApi.getAll(queryFilters);
-      setInvoices([...data].sort((a, b) => b.id - a.id));
+      setInvoices(data);
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  const sortedInvoices = sortData(invoices, sortBy, sortDirection);
 
   useEffect(() => {
     fetchRentals();
@@ -203,18 +216,25 @@ export default function InvoicesPage() {
           onChange={handleFilterChange}
           options={rentalOptions}
         />
+        <SortControl
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
+          options={sortOptions}
+        />
       </div>
 
       {loading ? (
         <Loading />
-      ) : invoices.length === 0 ? (
+      ) : sortedInvoices.length === 0 ? (
         <EmptyState
           message="Không tìm thấy hóa đơn tiền nhà nào."
           icon={FileText}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {invoices.map((invoice) => (
+          {sortedInvoices.map((invoice) => (
             <Card key={invoice.id} style={{ padding: '16px' }}>
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>

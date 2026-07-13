@@ -14,6 +14,8 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDateTime } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { Wrench, Plus, Calendar, AlertTriangle, MessageSquare, DollarSign } from 'lucide-react';
+import SortControl from '../../components/common/SortControl';
+import { sortData } from '../../utils/sortUtils';
 
 const priorityOptions = [
   { value: 'LOW', label: 'Thấp' },
@@ -27,6 +29,13 @@ export default function MyMaintenancePage() {
   const [requests, setRequests] = useState([]);
   const [activeRental, setActiveRental] = useState(null);
   const [demoTenantId, setDemoTenantId] = useState(null);
+  const [sortBy, setSortBy] = useState('id');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const sortOptions = [
+    { value: 'id', label: 'Mới nhất' },
+    { value: 'createdAt', label: 'Ngày tạo yêu cầu' },
+  ];
 
   // Modal form state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -65,9 +74,7 @@ export default function MyMaintenancePage() {
       if (myActiveRental) {
         setActiveRental(myActiveRental);
         const data = await maintenanceApi.getAll({ rentalId: myActiveRental.id });
-        // Sort by id descending
-        const sorted = [...data].sort((a, b) => b.id - a.id);
-        setRequests(sorted);
+        setRequests(data);
       } else {
         setRequests([]);
       }
@@ -77,6 +84,8 @@ export default function MyMaintenancePage() {
       setLoading(false);
     }
   };
+
+  const sortedRequests = sortData(requests, sortBy, sortDirection);
 
   useEffect(() => {
     loadMaintenanceData();
@@ -135,7 +144,7 @@ export default function MyMaintenancePage() {
     }
   };
 
-  if (loading && requests.length === 0) return <Loading />;
+  if (loading && sortedRequests.length === 0) return <Loading />;
 
   return (
     <div>
@@ -166,14 +175,26 @@ export default function MyMaintenancePage() {
         </div>
       )}
 
-      {requests.length === 0 ? (
+      {requests.length > 0 && (
+        <div style={{ marginBottom: '12px' }}>
+          <SortControl
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            options={sortOptions}
+          />
+        </div>
+      )}
+
+      {sortedRequests.length === 0 ? (
         <EmptyState
           message="Chưa có yêu cầu báo hỏng sửa chữa nào được gửi."
           icon={Wrench}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {requests.map((request, idx) => (
+          {sortedRequests.map((request, idx) => (
             <Card key={idx} style={{ padding: '16px' }}>
               {/* Card Header: Title & Status */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>

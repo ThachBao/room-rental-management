@@ -18,6 +18,8 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { Plus, Edit2, Trash2, Home, Users, Layers, Maximize, Eye, Calendar, Phone, DollarSign, Wrench } from 'lucide-react';
+import SortControl from '../../components/common/SortControl';
+import { sortData } from '../../utils/sortUtils';
 
 const filterStatusOptions = [
   { value: 'ALL', label: 'Tất cả trạng thái' },
@@ -33,6 +35,16 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState(initialStatus);
+  const [sortBy, setSortBy] = useState('id');
+  const [sortDirection, setSortDirection] = useState('desc');
+
+  const sortOptions = [
+    { value: 'id', label: 'Mới nhất' },
+    { value: 'roomNumber', label: 'Số phòng trọ' },
+    { value: 'baseRentPrice', label: 'Giá thuê phòng' },
+    { value: 'area', label: 'Diện tích phòng' },
+    { value: 'floor', label: 'Tầng' },
+  ];
   
   // Modals & Dialogs state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -57,13 +69,15 @@ export default function RoomsPage() {
     try {
       setLoading(true);
       const data = await roomApi.getAll(filterStatus === 'ALL' ? null : filterStatus);
-      setRooms([...data].sort((a, b) => b.id - a.id));
+      setRooms(data);
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  const sortedRooms = sortData(rooms, sortBy, sortDirection);
 
   useEffect(() => {
     fetchRooms();
@@ -185,18 +199,25 @@ export default function RoomsPage() {
             );
           })}
         </div>
+        <SortControl
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
+          options={sortOptions}
+        />
       </div>
 
       {loading ? (
         <Loading />
-      ) : rooms.length === 0 ? (
+      ) : sortedRooms.length === 0 ? (
         <EmptyState
           message="Không tìm thấy thông tin phòng trọ nào khớp với bộ lọc."
           icon={Home}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {rooms.map((room) => (
+          {sortedRooms.map((room) => (
             <Card key={room.id} style={{ padding: '16px' }}>
               {/* Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
