@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { userApi } from '../../api/userApi';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
 import Loading from '../../components/common/Loading';
-import Toast from '../../components/common/Toast';
-import { validateRequired, validatePhone } from '../../utils/validateForm';
 import { getErrorMessage } from '../../utils/errorHandler';
 import { LogOut } from 'lucide-react';
 
@@ -17,15 +14,7 @@ export default function AdminProfilePage() {
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
-    password: '',
   });
-  const [errors, setErrors] = useState({});
-  const [toast, setToast] = useState(null);
-  const [originalRole, setOriginalRole] = useState('LANDLORD');
-
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-  };
 
   const adminId = localStorage.getItem('adminId');
 
@@ -44,9 +33,7 @@ export default function AdminProfilePage() {
         setFormData({
           fullName: data.fullName ?? '',
           phone: data.phone ?? '',
-          password: '',
         });
-        setOriginalRole(data.userRole ?? 'LANDLORD');
         // Sync adminName in localStorage if it differs
         if (data.fullName) {
           localStorage.setItem('adminName', data.fullName);
@@ -60,67 +47,12 @@ export default function AdminProfilePage() {
     loadProfile();
   }, [adminId]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: null }));
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('userRole');
     localStorage.removeItem('adminId');
     localStorage.removeItem('adminName');
     localStorage.removeItem('token');
     navigate('/admin/login');
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = {};
-
-    if (!validateRequired(formData.fullName)) {
-      newErrors.fullName = 'Họ và tên không được để trống';
-    }
-    if (!validateRequired(formData.phone)) {
-      newErrors.phone = 'Số điện thoại liên hệ là bắt buộc';
-    } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
-    }
-
-    if (formData.password && formData.password.trim().length < 6) {
-      newErrors.password = 'Mật khẩu mới phải chứa ít nhất 6 ký tự';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    try {
-      const payload = {
-        fullName: formData.fullName.trim(),
-        phone: formData.phone.trim(),
-        userRole: originalRole,
-        enabled: true,
-      };
-
-      if (formData.password && formData.password.trim()) {
-        payload.password = formData.password.trim();
-      }
-
-      const updatedUser = await userApi.update(adminId, payload);
-      showToast('Cập nhật thông tin tài khoản thành công!');
-      
-      // Update stored name in localStorage
-      localStorage.setItem('adminName', updatedUser.fullName);
-      
-      // Clear password field after success
-      setFormData(prev => ({ ...prev, password: '' }));
-    } catch (err) {
-      showToast(getErrorMessage(err), 'error');
-    }
   };
 
   if (loading) return <Loading />;
@@ -159,73 +91,43 @@ export default function AdminProfilePage() {
         <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-muted)', marginTop: '4px' }}>Chủ nhà trọ</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <Card title="Thông tin tài khoản">
-          <Input
-            label="Họ và tên"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            required
-            error={errors.fullName}
-          />
-          <Input
-            label="Số điện thoại đăng nhập"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-            error={errors.phone}
-          />
-          <Input
-            label="Mật khẩu mới (để trống nếu không đổi)"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
-            error={errors.password}
-          />
-        </Card>
-
-        {/* Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '24px' }}>
-          <Button
-            type="submit"
-            variant="primary"
-            style={{ width: '100%', minHeight: '44px', fontWeight: 700 }}
-          >
-            Lưu thay đổi
-          </Button>
-
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleLogout}
-            style={{
-              width: '100%',
-              minHeight: '44px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              backgroundColor: '#fee2e2',
-              color: 'var(--danger)',
-              borderColor: '#fca5a5'
-            }}
-          >
-            <LogOut size={18} />
-            Đăng xuất
-          </Button>
+      <Card title="Thông tin tài khoản">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '8px 4px' }}>
+          <div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Họ và tên</div>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 500, color: 'var(--text)' }}>{formData.fullName || '---'}</div>
+          </div>
+          <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: 0 }} />
+          <div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Số điện thoại đăng nhập</div>
+            <div style={{ fontSize: 'var(--fs-md)', fontWeight: 500, color: 'var(--text)' }}>{formData.phone || '---'}</div>
+          </div>
         </div>
-      </form>
+      </Card>
 
-      {/* Toast alert */}
-      {toast && (
-        <div className="toast-container">
-          <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
-        </div>
-      )}
+      {/* Buttons */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '24px' }}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={handleLogout}
+          style={{
+            width: '100%',
+            minHeight: '44px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            backgroundColor: '#fee2e2',
+            color: 'var(--danger)',
+            borderColor: '#fca5a5',
+            fontWeight: 700
+          }}
+        >
+          <LogOut size={18} />
+          Đăng xuất
+        </Button>
+      </div>
     </div>
   );
 }
