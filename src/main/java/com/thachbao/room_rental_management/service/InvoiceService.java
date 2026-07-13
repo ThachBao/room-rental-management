@@ -15,4 +15,5 @@ public interface InvoiceService {
     InvoiceResponse markOverdue(Long id);
     InvoiceResponse confirmPayment(Long id, String receiptImageUrl);
     InvoiceResponse approvePayment(Long id);
+    void deleteInvoice(Long id);
 }

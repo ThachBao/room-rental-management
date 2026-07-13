@@ -8,7 +8,7 @@ import { uploadApi } from '../../api/uploadApi';
 import { invoiceApi } from '../../api/invoiceApi';
 import { ExternalLink } from 'lucide-react';
 
-export default function InvoiceDetail({ invoice, onClose, onStatusChange }) {
+export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDelete }) {
   if (!invoice) return null;
 
   const [uploading, setUploading] = useState(false);
@@ -227,6 +227,19 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange }) {
               style={{ flex: 1 }}
             >
               {actionLoading ? 'Đang duyệt...' : 'Duyệt thanh toán'}
+            </Button>
+          </div>
+        )}
+
+        {role === 'admin' && status === 'UNPAID' && onDelete && (
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+            <Button
+              variant="danger"
+              onClick={() => onDelete(invoice)}
+              disabled={actionLoading}
+              style={{ flex: 1 }}
+            >
+              Xóa hóa đơn
             </Button>
           </div>
         )}

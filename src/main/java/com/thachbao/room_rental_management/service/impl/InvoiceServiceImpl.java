@@ -282,4 +282,17 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         return invoiceMapper.toResponse(updatedInvoice);
     }
+
+    @Override
+    @Transactional
+    public void deleteInvoice(Long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn có id = " + id));
+
+        if (invoice.getStatus() != InvoiceStatus.UNPAID) {
+            throw new BadRequestException("Chỉ cho phép xóa hóa đơn khi trạng thái là UNPAID (Chưa thanh toán)");
+        }
+
+        invoiceRepository.delete(invoice);
+    }
 }

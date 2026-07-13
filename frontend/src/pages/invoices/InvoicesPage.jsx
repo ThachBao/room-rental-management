@@ -17,7 +17,7 @@ import { INVOICE_STATUS } from '../../constants/invoiceStatus';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
-import { Plus, Eye, Edit2, AlertTriangle, FileText, Calendar, User, DollarSign } from 'lucide-react';
+import { Plus, Eye, Edit2, AlertTriangle, FileText, Calendar, User, DollarSign, Trash2 } from 'lucide-react';
 import SortControl from '../../components/common/SortControl';
 import { sortData } from '../../utils/sortUtils';
 
@@ -127,6 +127,19 @@ export default function InvoicesPage() {
       fetchInvoices();
     } catch (err) {
       showToast(getErrorMessage(err), 'error');
+    }
+  };
+
+  const handleDeleteClick = async (invoice) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa hóa đơn của phòng ${invoice.roomNumber} kỳ tháng ${invoice.billingMonth} không?`)) {
+      try {
+        await invoiceApi.delete(invoice.id);
+        showToast('Xóa hóa đơn thành công!');
+        fetchInvoices();
+        setIsDetailModalOpen(false);
+      } catch (err) {
+        showToast(getErrorMessage(err), 'error');
+      }
     }
   };
 
@@ -291,6 +304,15 @@ export default function InvoicesPage() {
                       <AlertTriangle size={13} />
                       Báo trễ
                     </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDeleteClick(invoice)}
+                      style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px' }}
+                    >
+                      <Trash2 size={13} />
+                      Xóa
+                    </Button>
                   </>
                 )}
               </div>
@@ -325,6 +347,7 @@ export default function InvoicesPage() {
             fetchInvoices();
             showToast('Cập nhật trạng thái hóa đơn thành công');
           }}
+          onDelete={handleDeleteClick}
         />
       </Modal>
 

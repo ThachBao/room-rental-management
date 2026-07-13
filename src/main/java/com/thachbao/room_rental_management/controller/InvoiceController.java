@@ -73,4 +73,11 @@ public class InvoiceController {
     public InvoiceResponse approvePayment(@PathVariable Long id) {
         return invoiceService.approvePayment(id);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('LANDLORD')")
+    public void deleteInvoice(@PathVariable Long id) {
+        invoiceService.deleteInvoice(id);
+    }
 }

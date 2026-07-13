@@ -20,4 +20,5 @@ export const invoiceApi = {
   markOverdue: (id) => httpClient.put(`/api/invoices/${id}/mark-overdue`),
   confirmPayment: (id, receiptImageUrl) => httpClient.put(`/api/invoices/${id}/confirm-payment?receiptImageUrl=${encodeURIComponent(receiptImageUrl)}`),
   approvePayment: (id) => httpClient.put(`/api/invoices/${id}/approve-payment`),
+  delete: (id) => httpClient.delete(`/api/invoices/${id}`),
 };
