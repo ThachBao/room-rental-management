@@ -49,6 +49,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserByPhone(String phone) {
+        User user = userRepository.findByPhone(phone)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản có số điện thoại = " + phone));
+        return userMapper.toResponse(user);
+    }
+
+    @Override
     @Transactional
     public UserResponse createUser(UserCreateRequest request) {
         if (request.getPhone() == null || request.getPhone().trim().isEmpty()) {

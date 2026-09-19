@@ -3,8 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLoginPage from '../pages/auth/AdminLoginPage';
 import TenantLoginPage from '../pages/auth/TenantLoginPage';
 import AuthLayout from '../components/layout/AuthLayout';
-import AdminMobileLayout from '../components/layout/AdminMobileLayout';
-import TenantMobileLayout from '../components/layout/TenantMobileLayout';
+import AdminLayout from '../components/layout/AdminLayout';
+import TenantLayout from '../components/layout/TenantLayout';
 
 // Admin Page Imports
 import DashboardPage from '../pages/dashboard/DashboardPage';
@@ -37,7 +37,7 @@ function RootRoute() {
     return <Navigate to="/admin/dashboard" replace />;
   }
   if (role === 'tenant') {
-    return <Navigate to="/tenant/home" replace />;
+    return <Navigate to="/tenant/dashboard" replace />;
   }
   return <Navigate to="/admin/login" replace />;
 }
@@ -47,7 +47,7 @@ function AdminRoute({ children, title }) {
   if (role !== 'admin') {
     return <Navigate to="/admin/login" replace />;
   }
-  return <AdminMobileLayout title={title}>{children}</AdminMobileLayout>;
+  return <AdminLayout title={title}>{children}</AdminLayout>;
 }
 
 function TenantRoute({ children, title }) {
@@ -56,7 +56,7 @@ function TenantRoute({ children, title }) {
   if (role !== 'tenant' || !tenantId) {
     return <Navigate to="/tenant/login" replace />;
   }
-  return <TenantMobileLayout title={title}>{children}</TenantMobileLayout>;
+  return <TenantLayout title={title}>{children}</TenantLayout>;
 }
 
 export default function AppRoutes() {

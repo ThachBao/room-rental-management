@@ -1,17 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import {
+  Home,
+  DoorOpen,
+  Receipt,
+  CreditCard,
+  Wrench,
+  FileText,
+  User,
+  LogOut,
+  Building,
+  Menu,
+  X
+} from 'lucide-react';
 
 const tenantMenuItems = [
-  { path: '/tenant/dashboard', label: 'Trang của tôi', icon: '🏡' },
-  { path: '/tenant/my-room', label: 'Phòng đang thuê', icon: '🛏️' },
-  { path: '/tenant/my-invoices', label: 'Hóa đơn của tôi', icon: '🧾' },
-  { path: '/tenant/my-payments', label: 'Thanh toán của tôi', icon: '💳' },
-  { path: '/tenant/my-maintenance', label: 'Báo hỏng / Sửa chữa', icon: '🔧' },
-  { path: '/tenant/my-contracts', label: 'Hợp đồng của tôi', icon: '📄' },
-  { path: '/tenant/profile', label: 'Thông tin cá nhân', icon: '👤' },
+  { path: '/tenant/dashboard', label: 'Trang chủ của tôi', icon: Home },
+  { path: '/tenant/my-room', label: 'Phòng đang thuê', icon: DoorOpen },
+  { path: '/tenant/my-invoices', label: 'Hóa đơn dịch vụ', icon: Receipt },
+  { path: '/tenant/my-payments', label: 'Lịch sử thanh toán', icon: CreditCard },
+  { path: '/tenant/my-maintenance', label: 'Báo hỏng / Sửa chữa', icon: Wrench },
+  { path: '/tenant/my-contracts', label: 'Hồ sơ hợp đồng', icon: FileText },
+  { path: '/tenant/profile', label: 'Tài khoản cá nhân', icon: User },
 ];
 
-export default function TenantLayout({ children }) {
+export default function TenantLayout({ children, title = 'Cổng Khách Thuê' }) {
   const navigate = useNavigate();
   const location = useLocation();
   const tenantName = localStorage.getItem('demoTenantName') || 'Khách thuê trọ';
@@ -33,6 +46,7 @@ export default function TenantLayout({ children }) {
   }, [sidebarOpen]);
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('userRole');
     localStorage.removeItem('demoTenantId');
     localStorage.removeItem('demoTenantName');
@@ -48,69 +62,97 @@ export default function TenantLayout({ children }) {
       />
 
       {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : ''}`} style={{ backgroundColor: '#1e293b' }}>
-        <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Đóng menu">
-          ✕
-        </button>
-        <div className="sidebar-logo">
-          <span className="sidebar-logo-text" style={{ background: 'linear-gradient(135deg, #a7f3d0 0%, #10b981 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Cổng Người Thuê
-          </span>
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : ''}`} style={{ backgroundColor: '#0f172a' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}>
+              <Building size={20} />
+            </div>
+            <div>
+              <span className="sidebar-logo-text" style={{ fontSize: '1.1rem', fontWeight: 800 }}>RRMS</span>
+              <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Khách Thuê</div>
+            </div>
+          </div>
+          <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Đóng menu" style={{ color: '#94a3b8' }}>
+            <X size={20} />
+          </button>
         </div>
+
         <ul className="sidebar-menu">
-          {tenantMenuItems.map((item) => (
-            <li key={item.path} className="sidebar-item">
-              <NavLink
-                to={item.path}
-                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                style={({ isActive }) => isActive ? { backgroundColor: '#10b981', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' } : {}}
-              >
-                <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>{item.icon}</span>
-                <span>{item.label}</span>
-              </NavLink>
-            </li>
-          ))}
+          {tenantMenuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.path} className="sidebar-item">
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                >
+                  <Icon size={18} />
+                  <span>{item.label}</span>
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
-        <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+
+        {/* Sidebar Footer User Card */}
+        <div style={{ padding: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', background: 'rgba(15, 23, 42, 0.6)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399', fontWeight: 700, fontSize: '0.85rem' }}>
+              {tenantName.charAt(0).toUpperCase()}
+            </div>
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {tenantName}
+              </div>
+              <div style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>Khách thuê phòng</div>
+            </div>
+          </div>
           <button
             onClick={handleLogout}
             style={{
               width: '100%',
-              backgroundColor: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#f8fafc',
-              padding: '10px',
-              borderRadius: 'var(--radius-md)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#f87171',
+              padding: '8px 12px',
+              borderRadius: '8px',
               cursor: 'pointer',
               fontWeight: 600,
-              fontSize: 'var(--fs-sm)'
+              fontSize: '0.8rem',
+              transition: 'all 0.2s ease'
             }}
           >
-            Đổi vai trò / Đăng xuất
+            <LogOut size={15} />
+            <span>Đăng xuất</span>
           </button>
-        </div>
-        <div className="sidebar-footer">
-          Cổng tự phục vụ khách thuê
         </div>
       </aside>
 
       {/* Main content */}
       <div className="main-wrapper">
-        <header className="main-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="hamburger-btn" onClick={() => setSidebarOpen(true)} aria-label="Mở menu">
-              ☰
+        <header className="main-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', background: '#ffffff', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 40, boxShadow: 'var(--shadow-sm)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <button className="hamburger-btn" onClick={() => setSidebarOpen(true)} aria-label="Mở menu" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--secondary-light)', border: 'none', borderRadius: '8px', width: '38px', height: '38px', cursor: 'pointer', color: 'var(--dark)' }}>
+              <Menu size={20} />
             </button>
-            <div className="header-title-section">
-              <h1 className="header-title" style={{ color: '#10b981' }}>Cổng Người Thuê</h1>
-              <span className="header-subtitle">Thông tin tiện ích, hóa đơn và yêu cầu sửa chữa</span>
+            <div>
+              <h1 className="header-title" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--dark)' }}>{title}</h1>
+              <span className="header-subtitle" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Cổng thông tin & Tiện ích dành cho Khách thuê</span>
             </div>
           </div>
-          <div className="header-actions">
-            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600 }} className="hide-mobile">Xin chào, {tenantName}</span>
+          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, background: '#ecfdf5', color: '#059669', padding: '6px 12px', borderRadius: '20px' }}>
+              🧑 {tenantName}
+            </span>
           </div>
         </header>
-        <main className="content-pane">
+
+        <main className="content-pane" style={{ padding: '24px', flex: 1 }}>
           {children}
         </main>
       </div>

@@ -93,7 +93,7 @@
 
 body {
   font-family: var(--font-family);
-  background-color: #f3f4f6; /* Gray background on desktop */
+  background-color: var(--bg-main);
   color: var(--text-main);
   font-size: var(--fs-base);
   line-height: 1.6;
@@ -102,26 +102,12 @@ body {
   overflow-x: hidden;
 }
 
-/* Center mobile app mockup on desktop screens */
-@media (min-width: 769px) {
-  #root {
-    max-width: 430px;
-    margin: 0 auto;
-    min-height: 100vh;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.08);
-    background-color: var(--bg-main);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    border-left: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-  }
-}
-
-@media (max-width: 768px) {
-  body {
-    background-color: var(--bg-main);
-  }
+#root {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-main);
 }
 
 h1,

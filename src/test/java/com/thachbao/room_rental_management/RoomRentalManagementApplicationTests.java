@@ -9,5 +9,4 @@ class RoomRentalManagementApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }

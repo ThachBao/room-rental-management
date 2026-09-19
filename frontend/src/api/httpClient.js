@@ -1,5 +1,5 @@
 const handleResponse = async (response) => {
-  if (response.status === 401 || response.status === 403) {
+  if ((response.status === 401 || response.status === 403) && !window.location.pathname.includes('/login')) {
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
     localStorage.removeItem('adminId');
