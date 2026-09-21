@@ -50,4 +50,11 @@ public class MeterReadingController {
     ) {
         return meterReadingService.updateMeterReading(id, request);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('LANDLORD')")
+    public void deleteMeterReading(@PathVariable Long id) {
+        meterReadingService.deleteMeterReading(id);
+    }
 }

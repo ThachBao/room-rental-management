@@ -100,23 +100,26 @@ export default function DashboardPage() {
           box-shadow: var(--shadow-sm);
         }
         .dashboard-stat-card:hover {
-          transform: translateY(-3px);
+          transform: translateY(-2px);
           box-shadow: var(--shadow-md);
           border-color: var(--primary);
         }
         .dashboard-revenue-card {
-          background: linear-gradient(135deg, var(--primary) 0%, #15803d 100%);
-          color: var(--light);
-          padding: 24px 20px;
-          border-radius: var(--radius-lg);
+          background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+          color: #ffffff;
+          padding: 22px 20px;
+          border-radius: var(--radius-xl);
           margin-bottom: 20px;
           cursor: pointer;
           transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: var(--shadow-md);
+          box-shadow: 0 10px 25px -5px rgba(4, 120, 87, 0.35);
+          position: relative;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.12);
         }
         .dashboard-revenue-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 12px 24px -6px rgba(21, 128, 61, 0.35);
+          transform: translateY(-2px);
+          box-shadow: 0 14px 30px -5px rgba(4, 120, 87, 0.45);
         }
         .dashboard-tip-card {
           background-color: var(--light);
@@ -125,6 +128,22 @@ export default function DashboardPage() {
           border-radius: var(--radius-md);
           box-shadow: var(--shadow-sm);
           margin-top: 16px;
+        }
+        .dashboard-action-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 14px;
+          border-radius: var(--radius-md);
+          background-color: var(--bg-main);
+          cursor: pointer;
+          border: 1px solid transparent;
+          transition: all 0.18s ease;
+        }
+        .dashboard-action-item:hover {
+          background-color: #f1f5f9;
+          border-color: #e2e8f0;
+          transform: translateX(2px);
         }
       `}</style>
 
@@ -244,18 +263,7 @@ export default function DashboardPage() {
               <div
                 key={idx}
                 onClick={() => navigate(item.path)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px',
-                  borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'var(--bg-main)',
-                  cursor: 'pointer',
-                  transition: 'background-color var(--transition-fast)'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eaeaea'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-main)'}
+                className="dashboard-action-item"
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div
@@ -263,7 +271,7 @@ export default function DashboardPage() {
                       width: '36px',
                       height: '36px',
                       borderRadius: '8px',
-                      backgroundColor: `${item.color}20`,
+                      backgroundColor: `${item.color}15`,
                       color: item.color,
                       display: 'flex',
                       alignItems: 'center',

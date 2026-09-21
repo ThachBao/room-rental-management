@@ -8,4 +8,5 @@ export const utilityRateApi = {
   getById: (id) => httpClient.get(`/api/rental-utility-rates/${id}`),
   create: (data) => httpClient.post('/api/rental-utility-rates', data),
   update: (id, data) => httpClient.put(`/api/rental-utility-rates/${id}`, data),
+  delete: (id) => httpClient.delete(`/api/rental-utility-rates/${id}`),
 };

@@ -96,6 +96,22 @@ export default function RentalMembersPage() {
     setIsMoveOutModalOpen(true);
   };
 
+  const handleDeleteClick = async (member) => {
+    if (member.memberRole === 'REPRESENTATIVE') {
+      showToast('Không thể xóa thành viên là Người đại diện hợp đồng!', 'error');
+      return;
+    }
+    if (window.confirm(`Bạn có chắc chắn muốn xóa thành viên "${member.tenantName}" khỏi phòng ${member.roomNumber} không?`)) {
+      try {
+        await rentalMemberApi.delete(member.id);
+        showToast('Xóa thành viên phòng thành công!');
+        fetchMembers();
+      } catch (err) {
+        showToast(getErrorMessage(err), 'error');
+      }
+    }
+  };
+
   const handleFormSubmit = async (formData) => {
     try {
       if (selectedMember) {
@@ -153,11 +169,15 @@ export default function RentalMembersPage() {
       key: 'actions',
       render: (row) => {
         const canMoveOut = !row.moveOutDate;
+        const isRepresentative = row.memberRole === 'REPRESENTATIVE';
         return (
           <div className="table-actions">
             <Button variant="secondary" size="sm" onClick={() => handleEditClick(row)}>Sửa</Button>
             {canMoveOut && (
-              <Button variant="danger" size="sm" onClick={() => handleMoveOutClick(row)}>Báo chuyển ra</Button>
+              <Button variant="warning" size="sm" onClick={() => handleMoveOutClick(row)}>Báo dời đi</Button>
+            )}
+            {!isRepresentative && (
+              <Button variant="danger" size="sm" onClick={() => handleDeleteClick(row)}>Xóa</Button>
             )}
           </div>
         );

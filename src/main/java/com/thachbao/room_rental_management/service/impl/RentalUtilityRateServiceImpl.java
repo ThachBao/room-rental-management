@@ -28,6 +28,7 @@ public class RentalUtilityRateServiceImpl implements RentalUtilityRateService {
     private final RoomRentalRepository roomRentalRepository;
     private final UserRepository userRepository;
     private final RentalUtilityRateMapper rentalUtilityRateMapper;
+    private final com.thachbao.room_rental_management.repository.InvoiceRepository invoiceRepository;
     private final com.thachbao.room_rental_management.repository.TenantRepository tenantRepository;
     private final com.thachbao.room_rental_management.repository.RentalMemberRepository rentalMemberRepository;
 
@@ -130,7 +131,16 @@ public class RentalUtilityRateServiceImpl implements RentalUtilityRateService {
         validatePrices(request.getElectricUnitPrice(), request.getWaterUnitPrice(),
                 request.getInternetFee(), request.getTrashFee(), request.getParkingFee());
 
-        if (request.getEffectiveToMonth() != null && request.getEffectiveToMonth().compareTo(rate.getEffectiveFromMonth()) < 0) {
+        String fromMonth = request.getEffectiveFromMonth() != null && !request.getEffectiveFromMonth().isBlank()
+                ? request.getEffectiveFromMonth().trim()
+                : rate.getEffectiveFromMonth();
+
+        if (request.getEffectiveFromMonth() != null &&
+                rentalUtilityRateRepository.existsByRental_IdAndEffectiveFromMonthAndIdNot(rate.getRental().getId(), fromMonth, id)) {
+            throw new BadRequestException("Đã tồn tại cấu hình đơn giá cho lượt thuê này áp dụng từ tháng " + fromMonth);
+        }
+
+        if (request.getEffectiveToMonth() != null && request.getEffectiveToMonth().compareTo(fromMonth) < 0) {
             throw new BadRequestException("Tháng kết thúc hiệu lực không được nhỏ hơn tháng bắt đầu");
         }
 
@@ -148,6 +158,19 @@ public class RentalUtilityRateServiceImpl implements RentalUtilityRateService {
                 .sorted((r1, r2) -> r2.getEffectiveFromMonth().compareTo(r1.getEffectiveFromMonth()))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn giá tiện ích áp dụng cho tháng " + billingMonth));
+    }
+
+    @Override
+    @Transactional
+    public void deleteRentalUtilityRate(Long id) {
+        RentalUtilityRate rate = rentalUtilityRateRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn giá tiện ích có id = " + id));
+
+        if (invoiceRepository.existsByUtilityRate_Id(id)) {
+            throw new BadRequestException("Không thể xóa đơn giá tiện ích này vì đã có hóa đơn tiền nhà áp dụng đơn giá này.");
+        }
+
+        rentalUtilityRateRepository.delete(rate);
     }
 
     private void validatePrices(BigDecimal electric, BigDecimal water, BigDecimal internet, BigDecimal trash, BigDecimal parking) {

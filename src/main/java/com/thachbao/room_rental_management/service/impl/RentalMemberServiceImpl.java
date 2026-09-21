@@ -173,4 +173,17 @@ public class RentalMemberServiceImpl implements RentalMemberService {
         RentalMember updatedMember = rentalMemberRepository.save(member);
         return rentalMemberMapper.toResponse(updatedMember);
     }
+
+    @Override
+    @Transactional
+    public void deleteRentalMember(Long id) {
+        RentalMember member = rentalMemberRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thành viên thuê phòng có id = " + id));
+
+        if (member.getMemberRole() == RentalMemberRole.REPRESENTATIVE) {
+            throw new BadRequestException("Không thể xóa thành viên là Người đại diện hợp đồng. Hãy thực hiện trả phòng hoặc sửa hợp đồng.");
+        }
+
+        rentalMemberRepository.delete(member);
+    }
 }

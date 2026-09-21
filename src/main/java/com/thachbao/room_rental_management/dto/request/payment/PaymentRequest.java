@@ -25,7 +25,6 @@ public class PaymentRequest {
     @NotNull(message = "Ngày thanh toán không được để trống")
     private LocalDateTime paymentDate;
 
-    @NotNull(message = "Người nhận tiền không được để trống")
     private Long receivedByUserId;
 
     private String note;

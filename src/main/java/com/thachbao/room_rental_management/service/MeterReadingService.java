@@ -11,4 +11,5 @@ public interface MeterReadingService {
     MeterReadingResponse getMeterReadingById(Long id);
     MeterReadingResponse createMeterReading(MeterReadingCreateRequest request);
     MeterReadingResponse updateMeterReading(Long id, MeterReadingUpdateRequest request);
+    void deleteMeterReading(Long id);
 }

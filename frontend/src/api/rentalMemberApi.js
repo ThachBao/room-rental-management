@@ -9,4 +9,5 @@ export const rentalMemberApi = {
   create: (data) => httpClient.post('/api/rental-members', data),
   update: (id, data) => httpClient.put(`/api/rental-members/${id}`, data),
   moveOut: (id, data) => httpClient.put(`/api/rental-members/${id}/move-out`, data),
+  delete: (id) => httpClient.delete(`/api/rental-members/${id}`),
 };

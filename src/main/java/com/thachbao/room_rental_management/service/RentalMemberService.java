@@ -13,4 +13,5 @@ public interface RentalMemberService {
     RentalMemberResponse createRentalMember(RentalMemberCreateRequest request);
     RentalMemberResponse updateRentalMember(Long id, RentalMemberUpdateRequest request);
     RentalMemberResponse moveOutRentalMember(Long id, RentalMemberMoveOutRequest request);
+    void deleteRentalMember(Long id);
 }

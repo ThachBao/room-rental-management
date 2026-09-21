@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { invoiceApi } from '../../api/invoiceApi';
+import { paymentApi } from '../../api/paymentApi';
 import { roomRentalApi } from '../../api/roomRentalApi';
 import { meterReadingApi } from '../../api/meterReadingApi';
 import Card from '../../components/common/Card';
@@ -9,15 +10,17 @@ import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
 import Toast from '../../components/common/Toast';
 import Select from '../../components/common/Select';
+import Input from '../../components/common/Input';
 import InvoiceForm from './InvoiceForm';
 import InvoiceDetail from './InvoiceDetail';
 import Loading from '../../components/common/Loading';
 import EmptyState from '../../components/common/EmptyState';
 import { INVOICE_STATUS } from '../../constants/invoiceStatus';
+import { PAYMENT_METHOD, PAYMENT_METHOD_LABELS } from '../../constants/paymentMethod';
 import { formatCurrency } from '../../utils/formatCurrency';
-import { formatDate } from '../../utils/formatDate';
+import { formatDate, toLocalISOString } from '../../utils/formatDate';
 import { getErrorMessage } from '../../utils/errorHandler';
-import { Plus, Eye, Edit2, AlertTriangle, FileText, Calendar, User, DollarSign, Trash2 } from 'lucide-react';
+import { Plus, Eye, Edit2, AlertTriangle, FileText, Calendar, User, DollarSign, Trash2, CheckCircle, Banknote } from 'lucide-react';
 
 const filterStatusOptions = [
   { value: 'ALL', label: 'Tất cả trạng thái' },
@@ -45,6 +48,14 @@ export default function InvoicesPage() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+  // Quick Payment Modal state
+  const [isQuickPayOpen, setIsQuickPayOpen] = useState(false);
+  const [quickPayInvoice, setQuickPayInvoice] = useState(null);
+  const [quickPayMethod, setQuickPayMethod] = useState(PAYMENT_METHOD.CASH);
+  const [quickPayDate, setQuickPayDate] = useState('');
+  const [quickPayNote, setQuickPayNote] = useState('');
+  const [quickPayLoading, setQuickPayLoading] = useState(false);
 
   // Toast notifications
   const [toast, setToast] = useState(null);
@@ -105,6 +116,47 @@ export default function InvoicesPage() {
   const handleDetailClick = (invoice) => {
     setSelectedInvoice(invoice);
     setIsDetailModalOpen(true);
+  };
+
+  const handleQuickPayClick = (invoice) => {
+    setQuickPayInvoice(invoice);
+    setQuickPayMethod(PAYMENT_METHOD.CASH);
+    setQuickPayDate(toLocalISOString(new Date()));
+    setQuickPayNote(`Thu tiền mặt trực tiếp phòng ${invoice.roomNumber} kỳ tháng ${invoice.billingMonth}`);
+    setIsQuickPayOpen(true);
+  };
+
+  const handleQuickPaySubmit = async (e) => {
+    e.preventDefault();
+    if (!quickPayInvoice) return;
+    try {
+      setQuickPayLoading(true);
+      await paymentApi.create({
+        invoiceId: quickPayInvoice.id,
+        amount: quickPayInvoice.totalAmount,
+        paymentMethod: quickPayMethod,
+        paymentDate: quickPayDate ? quickPayDate + ':00' : toLocalISOString(new Date()) + ':00',
+        receivedByUserId: parseInt(localStorage.getItem('adminId') || '1', 10),
+        note: quickPayNote || 'Thu tiền trực tiếp'
+      });
+      showToast(`Đã thu tiền và thanh toán thành công hóa đơn Phòng ${quickPayInvoice.roomNumber}!`);
+      setIsQuickPayOpen(false);
+      fetchInvoices();
+    } catch (err) {
+      showToast(getErrorMessage(err), 'error');
+    } finally {
+      setQuickPayLoading(false);
+    }
+  };
+
+  const handleApprovePaymentClick = async (invoice) => {
+    try {
+      await invoiceApi.approvePayment(invoice.id);
+      showToast(`Duyệt thanh toán cho phòng ${invoice.roomNumber} thành công!`);
+      fetchInvoices();
+    } catch (err) {
+      showToast(getErrorMessage(err), 'error');
+    }
   };
 
   const handleMarkOverdueClick = async (invoice) => {
@@ -254,17 +306,43 @@ export default function InvoicesPage() {
               </div>
 
               {/* Actions Footer */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={() => handleDetailClick(invoice)}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px', marginRight: 'auto' }}
                 >
                   <Eye size={13} />
                   Chi tiết
                 </Button>
-                {invoice.status === INVOICE_STATUS.UNPAID && (
+
+                {/* Quick Cash Payment button for Manager */}
+                {(invoice.status === INVOICE_STATUS.UNPAID || invoice.status === INVOICE_STATUS.OVERDUE) && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleQuickPayClick(invoice)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px', backgroundColor: '#10b981', borderColor: '#10b981', color: '#fff', fontWeight: 700 }}
+                  >
+                    <CheckCircle size={13} />
+                    Thu tiền
+                  </Button>
+                )}
+
+                {invoice.status === INVOICE_STATUS.PENDING_APPROVAL && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleApprovePaymentClick(invoice)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px', fontWeight: 700 }}
+                  >
+                    <CheckCircle size={13} />
+                    Duyệt TT
+                  </Button>
+                )}
+
+                {(invoice.status === INVOICE_STATUS.UNPAID || invoice.status === INVOICE_STATUS.OVERDUE) && (
                   <>
                     <Button
                       variant="secondary"
@@ -275,15 +353,17 @@ export default function InvoicesPage() {
                       <Edit2 size={13} />
                       Sửa
                     </Button>
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      onClick={() => handleMarkOverdueClick(invoice)}
-                      style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px' }}
-                    >
-                      <AlertTriangle size={13} />
-                      Báo trễ
-                    </Button>
+                    {invoice.status === INVOICE_STATUS.UNPAID && (
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={() => handleMarkOverdueClick(invoice)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px' }}
+                      >
+                        <AlertTriangle size={13} />
+                        Báo trễ
+                      </Button>
+                    )}
                     <Button
                       variant="danger"
                       size="sm"
@@ -300,6 +380,75 @@ export default function InvoicesPage() {
           ))}
         </div>
       )}
+
+      {/* Quick Pay Modal */}
+      <Modal
+        isOpen={isQuickPayOpen}
+        onClose={() => setIsQuickPayOpen(false)}
+        title={`Xác nhận thu tiền - Phòng ${quickPayInvoice?.roomNumber}`}
+      >
+        {quickPayInvoice && (
+          <form onSubmit={handleQuickPaySubmit}>
+            <div style={{ backgroundColor: 'var(--primary-light)', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '13px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Khách thuê đại diện:</span>
+                <strong>{quickPayInvoice.representativeTenantName}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Kỳ hóa đơn:</span>
+                <strong>Tháng {quickPayInvoice.billingMonth}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px dashed var(--border-color)', paddingTop: '8px' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--dark)' }}>Số tiền thực thu:</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)' }}>
+                  {formatCurrency(quickPayInvoice.totalAmount)}
+                </span>
+              </div>
+            </div>
+
+            <div className="responsive-grid-2">
+              <Select
+                label="Phương thức thu tiền"
+                name="paymentMethod"
+                value={quickPayMethod}
+                onChange={(e) => setQuickPayMethod(e.target.value)}
+                options={Object.entries(PAYMENT_METHOD_LABELS).map(([val, lbl]) => ({ value: val, label: lbl }))}
+                required
+              />
+              <Input
+                label="Thời điểm thu tiền"
+                name="paymentDate"
+                type="datetime-local"
+                value={quickPayDate}
+                onChange={(e) => setQuickPayDate(e.target.value)}
+                required
+              />
+            </div>
+
+            <Input
+              label="Ghi chú thu tiền"
+              name="note"
+              value={quickPayNote}
+              onChange={(e) => setQuickPayNote(e.target.value)}
+              placeholder="Ghi chú (Ví dụ: Thu tiền mặt tại phòng...)"
+            />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
+              <Button variant="secondary" onClick={() => setIsQuickPayOpen(false)} disabled={quickPayLoading}>
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={quickPayLoading}
+                style={{ backgroundColor: '#10b981', borderColor: '#10b981', fontWeight: 700 }}
+              >
+                {quickPayLoading ? 'Đang xử lý...' : 'Xác nhận đã nhận tiền'}
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
 
       {/* Form Modal (Bottom Sheet on mobile) */}
       <Modal

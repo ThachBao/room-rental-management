@@ -48,4 +48,11 @@ public class RentalUtilityRateController {
     ) {
         return rentalUtilityRateService.updateRentalUtilityRate(id, request);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('LANDLORD')")
+    public void deleteRentalUtilityRate(@PathVariable Long id) {
+        rentalUtilityRateService.deleteRentalUtilityRate(id);
+    }
 }

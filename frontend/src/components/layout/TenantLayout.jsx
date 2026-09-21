@@ -62,19 +62,19 @@ export default function TenantLayout({ children, title = 'Cổng Khách Thuê' }
       />
 
       {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : ''}`} style={{ backgroundColor: '#0f172a' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : ''}`}>
+        <div className="sidebar-logo">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)' }}>
-              <Building size={20} />
+            <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)' }}>
+              <Building size={18} />
             </div>
             <div>
-              <span className="sidebar-logo-text" style={{ fontSize: '1.1rem', fontWeight: 800 }}>RRMS</span>
-              <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Khách Thuê</div>
+              <span className="sidebar-logo-text">RRMS</span>
+              <div style={{ fontSize: '0.6875rem', color: '#64748b', fontWeight: 600, letterSpacing: '0.04em' }}>CỔNG KHÁCH THUÊ</div>
             </div>
           </div>
-          <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Đóng menu" style={{ color: '#94a3b8' }}>
-            <X size={20} />
+          <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Đóng menu">
+            <X size={18} />
           </button>
         </div>
 
@@ -87,7 +87,7 @@ export default function TenantLayout({ children, title = 'Cổng Khách Thuê' }
                   to={item.path}
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                 >
-                  <Icon size={18} />
+                  <Icon size={17} />
                   <span>{item.label}</span>
                 </NavLink>
               </li>
@@ -96,16 +96,16 @@ export default function TenantLayout({ children, title = 'Cổng Khách Thuê' }
         </ul>
 
         {/* Sidebar Footer User Card */}
-        <div style={{ padding: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', background: 'rgba(15, 23, 42, 0.6)' }}>
+        <div className="sidebar-footer">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#34d399', fontWeight: 700, fontSize: '0.85rem' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#38bdf8', fontWeight: 700, fontSize: '0.8125rem' }}>
               {tenantName.charAt(0).toUpperCase()}
             </div>
-            <div style={{ overflow: 'hidden' }}>
-              <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+            <div style={{ overflow: 'hidden', flex: 1 }}>
+              <div style={{ color: '#f8fafc', fontWeight: 600, fontSize: '0.8125rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                 {tenantName}
               </div>
-              <div style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>Khách thuê phòng</div>
+              <div style={{ color: '#94a3b8', fontSize: '0.6875rem' }}>Khách thuê phòng</div>
             </div>
           </div>
           <button
@@ -115,19 +115,21 @@ export default function TenantLayout({ children, title = 'Cổng Khách Thuê' }
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#f87171',
-              padding: '8px 12px',
-              borderRadius: '8px',
+              gap: '6px',
+              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              color: '#94a3b8',
+              padding: '7px 10px',
+              borderRadius: '6px',
               cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              transition: 'all 0.2s ease'
+              fontWeight: 500,
+              fontSize: '0.75rem',
+              transition: 'all 0.15s ease'
             }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.04)'; e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'; }}
           >
-            <LogOut size={15} />
+            <LogOut size={14} />
             <span>Đăng xuất</span>
           </button>
         </div>
@@ -135,24 +137,29 @@ export default function TenantLayout({ children, title = 'Cổng Khách Thuê' }
 
       {/* Main content */}
       <div className="main-wrapper">
-        <header className="main-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', background: '#ffffff', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0, zIndex: 40, boxShadow: 'var(--shadow-sm)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <button className="hamburger-btn" onClick={() => setSidebarOpen(true)} aria-label="Mở menu" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--secondary-light)', border: 'none', borderRadius: '8px', width: '38px', height: '38px', cursor: 'pointer', color: 'var(--dark)' }}>
-              <Menu size={20} />
+        <header className="main-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button className="hamburger-btn" onClick={() => setSidebarOpen(true)} aria-label="Mở menu">
+              <Menu size={18} />
             </button>
-            <div>
-              <h1 className="header-title" style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--dark)' }}>{title}</h1>
-              <span className="header-subtitle" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Cổng thông tin & Tiện ích dành cho Khách thuê</span>
+            <div className="header-title-section">
+              <h1 className="header-title">{title}</h1>
+              <span className="header-subtitle">Cổng thông tin & Tiện ích dành cho Khách thuê</span>
             </div>
           </div>
-          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, background: '#ecfdf5', color: '#059669', padding: '6px 12px', borderRadius: '20px' }}>
-              🧑 {tenantName}
-            </span>
+          <div className="header-actions">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px', background: '#f0f9ff', borderRadius: '20px', border: '1px solid #bae6fd' }}>
+              <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#0284c7', color: '#ffffff', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {tenantName.charAt(0).toUpperCase()}
+              </div>
+              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#0369a1' }}>
+                {tenantName}
+              </span>
+            </div>
           </div>
         </header>
 
-        <main className="content-pane" style={{ padding: '24px', flex: 1 }}>
+        <main className="content-pane">
           {children}
         </main>
       </div>

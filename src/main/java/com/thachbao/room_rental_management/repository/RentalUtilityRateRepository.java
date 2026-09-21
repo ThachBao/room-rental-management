@@ -7,5 +7,6 @@ import java.util.List;
 public interface RentalUtilityRateRepository extends JpaRepository<RentalUtilityRate, Long> {
     List<RentalUtilityRate> findByRental_Id(Long rentalId);
     boolean existsByRental_IdAndEffectiveFromMonth(Long rentalId, String effectiveFromMonth);
+    boolean existsByRental_IdAndEffectiveFromMonthAndIdNot(Long rentalId, String effectiveFromMonth, Long id);
     List<RentalUtilityRate> findByRental_IdAndEffectiveFromMonthLessThanEqual(Long rentalId, String billingMonth);
 }

@@ -59,4 +59,11 @@ public class RentalMemberController {
     ) {
         return rentalMemberService.moveOutRentalMember(id, request);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('LANDLORD')")
+    public void deleteRentalMember(@PathVariable Long id) {
+        rentalMemberService.deleteRentalMember(id);
+    }
 }

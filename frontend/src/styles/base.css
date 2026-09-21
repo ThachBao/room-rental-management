@@ -1,88 +1,102 @@
-/* Base system styles & variables */
+/* Modern Human-Crafted Design System & Tokens */
 :root {
-  /* Green color palette */
+  /* Brand Palette: Sophisticated Emerald & Slate */
   --primary-50: #f0fdf4;
-  --primary: #22c55e;
-  --primary-hover: #16a34a;
+  --primary-100: #dcfce7;
   --primary-light: #ecfdf5;
+  --primary-border: #a7f3d0;
+  --primary: #059669;
+  --primary-hover: #047857;
+  --primary-dark: #065f46;
 
-  --secondary: #6b7280;
-  --secondary-hover: #4b5563;
-  --secondary-light: #f3f4f6;
+  --secondary: #475569;
+  --secondary-hover: #334155;
+  --secondary-light: #f1f5f9;
+  --secondary-border: #e2e8f0;
 
-  --success: #22c55e;
-  --success-hover: #16a34a;
-  --success-light: #d1fae5;
+  --success: #059669;
+  --success-hover: #047857;
+  --success-light: #ecfdf5;
+  --success-border: #a7f3d0;
 
-  --warning: #f59e0b;
-  --warning-hover: #d97706;
-  --warning-light: #fef3c7;
+  --warning: #d97706;
+  --warning-hover: #b45309;
+  --warning-light: #fffbeb;
+  --warning-border: #fde68a;
 
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
-  --danger-light: #fee2e2;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --danger-light: #fef2f2;
+  --danger-border: #fecaca;
 
-  --dark: #111827;
+  --info: #0284c7;
+  --info-light: #f0f9ff;
+  --info-border: #bae6fd;
+
+  /* Neutrals & Surfaces */
+  --dark: #0f172a;
+  --dark-surface: #1e293b;
   --light: #ffffff;
-  --bg-main: #f6f8f7;
-  --border-color: #e5e7eb;
+  --bg-main: #f8fafc;
+  --border-color: #e2e8f0;
+  --border-subtle: #f1f5f9;
 
-  --text-main: #111827;
-  --text-muted: #6b7280;
-  --text-light: #9ca3af;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
 
-  /* Typography */
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
+  /* Typography: Human-Centric Font System */
+  --font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Responsive Font Size System */
+  /* Responsive Font Size Hierarchy */
   --fs-xs: 0.75rem;      /* 12px */
   --fs-sm: 0.8125rem;    /* 13px */
   --fs-base: 0.875rem;   /* 14px */
-  --fs-md: 1rem;         /* 16px */
-  --fs-lg: 1.125rem;     /* 18px */
+  --fs-md: 0.9375rem;    /* 15px */
+  --fs-lg: 1.0625rem;    /* 17px */
   --fs-xl: 1.25rem;      /* 20px */
   --fs-2xl: 1.5rem;      /* 24px */
-  --fs-3xl: 1.75rem;     /* 28px */
-}
-
-/* Optimize font sizes specifically for mobile devices (screen width <= 480px) */
-@media (max-width: 480px) {
-  :root {
-    --fs-xs: 0.7rem;       /* 11px */
-    --fs-sm: 0.75rem;      /* 12px */
-    --fs-base: 0.8125rem;  /* 13px */
-    --fs-md: 0.9375rem;    /* 15px */
-    --fs-lg: 1.0625rem;    /* 17px */
-    --fs-xl: 1.1875rem;    /* 19px */
-    --fs-2xl: 1.375rem;    /* 22px */
-    --fs-3xl: 1.5625rem;   /* 25px */
-  }
-}
-
-:root {
+  --fs-3xl: 1.875rem;    /* 30px */
 
   /* Responsive Spacing */
-  --space-page: 16px;
-  --space-card: 16px;
-  --space-section: 16px;
+  --space-page: 20px;
+  --space-card: 18px;
+  --space-section: 20px;
 
-  /* Shadow effects */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  --shadow-premium: 0 8px 30px rgba(34, 197, 94, 0.08);
+  /* Subtle, Multi-layer Elevation Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.07), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+  --shadow-premium: 0 12px 32px -4px rgba(5, 150, 105, 0.08);
 
-  /* Borders & Radius */
+  /* Clean Borders & Radius */
+  --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
 
   /* Transitions */
-  --transition-fast: 0.15s ease;
-  --transition-normal: 0.25s ease;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 480px) {
+  :root {
+    --fs-xs: 0.7rem;
+    --fs-sm: 0.75rem;
+    --fs-base: 0.8125rem;
+    --fs-md: 0.875rem;
+    --fs-lg: 1rem;
+    --fs-xl: 1.125rem;
+    --fs-2xl: 1.25rem;
+    --fs-3xl: 1.5rem;
+    --space-page: 14px;
+    --space-card: 14px;
+  }
 }
 
 * {
@@ -96,9 +110,11 @@ body {
   background-color: var(--bg-main);
   color: var(--text-main);
   font-size: var(--fs-base);
-  line-height: 1.6;
+  line-height: 1.55;
+  letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
 }
 
@@ -110,20 +126,20 @@ body {
   background-color: var(--bg-main);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--dark);
+  letter-spacing: -0.025em;
+  line-height: 1.3;
 }
 
-h1 { font-size: var(--fs-xl); }
-h2 { font-size: var(--fs-lg); }
-h3 { font-size: var(--fs-md); }
+h1 { font-size: var(--fs-2xl); }
+h2 { font-size: var(--fs-xl); }
+h3 { font-size: var(--fs-lg); }
+h4 { font-size: var(--fs-md); }
+h5 { font-size: var(--fs-base); }
+h6 { font-size: var(--fs-sm); }
 
 a {
   text-decoration: none;
@@ -135,22 +151,19 @@ a:hover {
   color: var(--primary-hover);
 }
 
-input,
-button,
-select,
-textarea {
+input, button, select, textarea {
   font-family: inherit;
   font-size: inherit;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-main);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -166,6 +179,7 @@ textarea {
 .hide-mobile {
   display: none !important;
 }
+
 @media (min-width: 769px) {
   .hide-desktop {
     display: none !important;

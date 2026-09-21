@@ -16,4 +16,5 @@ export const meterReadingApi = {
   getById: (id) => httpClient.get(`/api/meter-readings/${id}`),
   create: (data) => httpClient.post('/api/meter-readings', data),
   update: (id, data) => httpClient.put(`/api/meter-readings/${id}`, data),
+  delete: (id) => httpClient.delete(`/api/meter-readings/${id}`),
 };

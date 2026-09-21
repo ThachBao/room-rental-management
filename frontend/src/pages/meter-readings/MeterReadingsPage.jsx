@@ -81,6 +81,18 @@ export default function MeterReadingsPage() {
     setIsFormModalOpen(true);
   };
 
+  const handleDeleteClick = async (reading) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa bản ghi chốt số điện nước kỳ tháng ${reading.billingMonth} của phòng ${reading.roomNumber} không?`)) {
+      try {
+        await meterReadingApi.delete(reading.id);
+        showToast('Xóa chỉ số điện nước thành công!');
+        fetchReadings();
+      } catch (err) {
+        showToast(getErrorMessage(err), 'error');
+      }
+    }
+  };
+
   const handleFormSubmit = async (formData) => {
     try {
       if (selectedReading) {
@@ -127,7 +139,8 @@ export default function MeterReadingsPage() {
       key: 'actions',
       render: (row) => (
         <div className="table-actions">
-          <Button variant="secondary" size="sm" onClick={() => handleEditClick(row)}>Sửa chỉ số</Button>
+          <Button variant="secondary" size="sm" onClick={() => handleEditClick(row)}>Sửa</Button>
+          <Button variant="danger" size="sm" onClick={() => handleDeleteClick(row)}>Xóa</Button>
         </div>
       ),
     },

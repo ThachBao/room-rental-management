@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import Badge from '../../components/common/Badge';
 import { INVOICE_STATUS, INVOICE_STATUS_LABELS, INVOICE_STATUS_BADGES } from '../../constants/invoiceStatus';
+import { PAYMENT_METHOD, PAYMENT_METHOD_LABELS } from '../../constants/paymentMethod';
 import { formatCurrency } from '../../utils/formatCurrency';
-import { formatDate, formatDateTime } from '../../utils/formatDate';
+import { formatDate, formatDateTime, toLocalISOString } from '../../utils/formatDate';
 import Button from '../../components/common/Button';
+import Select from '../../components/common/Select';
+import Input from '../../components/common/Input';
 import { uploadApi } from '../../api/uploadApi';
 import { invoiceApi } from '../../api/invoiceApi';
-import { ExternalLink } from 'lucide-react';
+import { paymentApi } from '../../api/paymentApi';
+import { ExternalLink, CheckCircle, Banknote } from 'lucide-react';
 
 export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDelete }) {
   if (!invoice) return null;
@@ -16,6 +20,12 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
   const [receiptUrl, setReceiptUrl] = useState(invoice.receiptImageUrl || '');
   const [status, setStatus] = useState(invoice.status);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Admin direct payment state
+  const [showPayForm, setShowPayForm] = useState(false);
+  const [payMethod, setPayMethod] = useState(PAYMENT_METHOD.CASH);
+  const [payDate, setPayDate] = useState(toLocalISOString(new Date()));
+  const [payNote, setPayNote] = useState(`Thu tiền trực tiếp phòng ${invoice.roomNumber}`);
 
   const role = localStorage.getItem('userRole'); // 'admin' or 'tenant'
 
@@ -63,6 +73,29 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
       if (onStatusChange) onStatusChange(updated);
     } catch (err) {
       setError(err.message || 'Lỗi khi duyệt thanh toán');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleAdminDirectPayment = async (e) => {
+    e.preventDefault();
+    try {
+      setActionLoading(true);
+      setError(null);
+      await paymentApi.create({
+        invoiceId: invoice.id,
+        amount: invoice.totalAmount,
+        paymentMethod: payMethod,
+        paymentDate: payDate ? payDate + ':00' : toLocalISOString(new Date()) + ':00',
+        receivedByUserId: parseInt(localStorage.getItem('adminId') || '1', 10),
+        note: payNote || 'Thu tiền trực tiếp'
+      });
+      setStatus(INVOICE_STATUS.PAID);
+      setShowPayForm(false);
+      if (onStatusChange) onStatusChange({ ...invoice, status: INVOICE_STATUS.PAID, paidAt: new Date().toISOString() });
+    } catch (err) {
+      setError(err.message || 'Lỗi khi lưu phiếu thu');
     } finally {
       setActionLoading(false);
     }
@@ -190,6 +223,7 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
           </div>
         )}
 
+        {/* Tenant upload receipt */}
         {role === 'tenant' && (status === 'UNPAID' || status === 'OVERDUE') && (
           <div style={{ backgroundColor: 'var(--secondary-light)', padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>
@@ -218,29 +252,89 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
           </div>
         )}
 
+        {/* Admin Approve Pending Payment */}
         {role === 'admin' && status === 'PENDING_APPROVAL' && (
           <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
             <Button
               variant="primary"
               onClick={handleApprovePayment}
               disabled={actionLoading}
-              style={{ flex: 1 }}
+              style={{ flex: 1, backgroundColor: '#10b981', borderColor: '#10b981', fontWeight: 700 }}
             >
-              {actionLoading ? 'Đang duyệt...' : 'Duyệt thanh toán'}
+              {actionLoading ? 'Đang duyệt...' : '✓ Duyệt thanh toán ngay'}
             </Button>
           </div>
         )}
 
-        {role === 'admin' && status === 'UNPAID' && onDelete && (
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-            <Button
-              variant="danger"
-              onClick={() => onDelete(invoice)}
-              disabled={actionLoading}
-              style={{ flex: 1 }}
-            >
-              Xóa hóa đơn
-            </Button>
+        {/* Admin Direct Collection (Cash / Transfer) */}
+        {role === 'admin' && (status === 'UNPAID' || status === 'OVERDUE') && (
+          <div style={{ marginBottom: '16px' }}>
+            {!showPayForm ? (
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <Button
+                  variant="primary"
+                  onClick={() => setShowPayForm(true)}
+                  style={{ flex: 1, backgroundColor: '#10b981', borderColor: '#10b981', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  <Banknote size={16} />
+                  Xác nhận thu tiền mặt / Thanh toán
+                </Button>
+                {status === 'UNPAID' && onDelete && (
+                  <Button
+                    variant="danger"
+                    onClick={() => onDelete(invoice)}
+                    disabled={actionLoading}
+                  >
+                    Xóa hóa đơn
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <form onSubmit={handleAdminDirectPayment} style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+                <h5 style={{ margin: '0 0 12px 0', color: '#166534', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle size={16} /> Lập phiếu thu tiền
+                </h5>
+                <div className="responsive-grid-2">
+                  <Select
+                    label="Hình thức thanh toán"
+                    name="payMethod"
+                    value={payMethod}
+                    onChange={(e) => setPayMethod(e.target.value)}
+                    options={Object.entries(PAYMENT_METHOD_LABELS).map(([val, lbl]) => ({ value: val, label: lbl }))}
+                    required
+                  />
+                  <Input
+                    label="Ngày nhận tiền"
+                    name="payDate"
+                    type="datetime-local"
+                    value={payDate}
+                    onChange={(e) => setPayDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <Input
+                  label="Ghi chú"
+                  name="payNote"
+                  value={payNote}
+                  onChange={(e) => setPayNote(e.target.value)}
+                  placeholder="Ghi chú thu tiền..."
+                />
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                  <Button variant="secondary" size="sm" onClick={() => setShowPayForm(false)} disabled={actionLoading}>
+                    Hủy
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    disabled={actionLoading}
+                    style={{ backgroundColor: '#10b981', borderColor: '#10b981', fontWeight: 700 }}
+                  >
+                    {actionLoading ? 'Đang lưu...' : 'Xác nhận đã nhận tiền'}
+                  </Button>
+                </div>
+              </form>
+            )}
           </div>
         )}
 

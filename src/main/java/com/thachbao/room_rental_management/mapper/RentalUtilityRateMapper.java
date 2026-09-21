@@ -58,6 +58,9 @@ public class RentalUtilityRateMapper {
         entity.setInternetFee(request.getInternetFee());
         entity.setTrashFee(request.getTrashFee());
         entity.setParkingFee(request.getParkingFee());
+        if (request.getEffectiveFromMonth() != null && !request.getEffectiveFromMonth().isBlank()) {
+            entity.setEffectiveFromMonth(request.getEffectiveFromMonth().trim());
+        }
         entity.setEffectiveToMonth(blankToNull(request.getEffectiveToMonth()));
         entity.setNote(blankToNull(request.getNote()));
     }

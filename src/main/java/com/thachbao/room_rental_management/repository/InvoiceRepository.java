@@ -13,6 +13,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     boolean existsByRental_IdAndBillingMonth(Long rentalId, String billingMonth);
 
     List<Invoice> findByRental_IdIn(List<Long> rentalIds);
+    boolean existsByMeterReading_Id(Long meterReadingId);
+    boolean existsByUtilityRate_Id(Long utilityRateId);
 
     @org.springframework.data.jpa.repository.Query("SELECT i FROM Invoice i WHERE " +
             "(:status IS NULL OR i.status = :status) AND " +

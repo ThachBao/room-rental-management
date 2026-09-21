@@ -125,8 +125,17 @@ public class PaymentServiceImpl implements PaymentService {
             throw new BadRequestException("Số tiền thanh toán phải bằng đúng tổng tiền hóa đơn: " + invoice.getTotalAmount());
         }
 
-        User user = userRepository.findById(request.getReceivedByUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người nhận tiền có id = " + request.getReceivedByUserId()));
+        Long receivedByUserId = request.getReceivedByUserId();
+        User user;
+        if (receivedByUserId != null) {
+            user = userRepository.findById(receivedByUserId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người nhận tiền có id = " + receivedByUserId));
+        } else {
+            String currentUserPhone = com.thachbao.room_rental_management.security.SecurityUtils.getCurrentUserPhone()
+                    .orElseThrow(() -> new BadRequestException("Không tìm thấy thông tin quản trị viên nhận tiền"));
+            user = userRepository.findByPhone(currentUserPhone)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng có số điện thoại = " + currentUserPhone));
+        }
 
         Payment payment = paymentMapper.toEntity(request);
         payment.setInvoice(invoice);

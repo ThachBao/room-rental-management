@@ -26,6 +26,7 @@ public class MeterReadingServiceImpl implements MeterReadingService {
     private final MeterReadingRepository meterReadingRepository;
     private final RoomRentalRepository roomRentalRepository;
     private final MeterReadingMapper meterReadingMapper;
+    private final com.thachbao.room_rental_management.repository.InvoiceRepository invoiceRepository;
     private final com.thachbao.room_rental_management.repository.TenantRepository tenantRepository;
     private final com.thachbao.room_rental_management.repository.RentalMemberRepository rentalMemberRepository;
 
@@ -126,6 +127,19 @@ public class MeterReadingServiceImpl implements MeterReadingService {
         meterReadingMapper.updateEntity(reading, request);
         MeterReading updatedReading = meterReadingRepository.save(reading);
         return meterReadingMapper.toResponse(updatedReading);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMeterReading(Long id) {
+        MeterReading reading = meterReadingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chỉ số điện nước có id = " + id));
+
+        if (invoiceRepository.existsByMeterReading_Id(id)) {
+            throw new BadRequestException("Không thể xóa chỉ số điện nước này vì đã có hóa đơn tiền nhà được tạo từ chỉ số này.");
+        }
+
+        meterReadingRepository.delete(reading);
     }
 
     private void validateNumbers(Integer oldElectric, Integer newElectric, Integer oldWater, Integer newWater) {

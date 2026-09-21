@@ -13,4 +13,5 @@ public interface RentalUtilityRateService {
     RentalUtilityRateResponse createRentalUtilityRate(RentalUtilityRateCreateRequest request);
     RentalUtilityRateResponse updateRentalUtilityRate(Long id, RentalUtilityRateUpdateRequest request);
     RentalUtilityRate getAppliedUtilityRate(Long rentalId, String billingMonth);
+    void deleteRentalUtilityRate(Long id);
 }

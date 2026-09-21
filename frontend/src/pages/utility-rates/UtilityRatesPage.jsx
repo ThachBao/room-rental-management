@@ -68,6 +68,18 @@ export default function UtilityRatesPage() {
     setIsFormModalOpen(true);
   };
 
+  const handleDeleteClick = async (rate) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa cấu hình đơn giá của phòng ${rate.roomNumber || rate.rentalId} (áp dụng từ tháng ${rate.effectiveFromMonth}) không?`)) {
+      try {
+        await utilityRateApi.delete(rate.id);
+        showToast('Xóa cấu hình đơn giá thành công!');
+        fetchRates();
+      } catch (err) {
+        showToast(getErrorMessage(err), 'error');
+      }
+    }
+  };
+
   const handleFormSubmit = async (formData) => {
     try {
       if (selectedRate) {
@@ -135,7 +147,8 @@ export default function UtilityRatesPage() {
       key: 'actions',
       render: (row) => (
         <div className="table-actions">
-          <Button variant="secondary" size="sm" onClick={() => handleEditClick(row)}>Sửa đơn giá</Button>
+          <Button variant="secondary" size="sm" onClick={() => handleEditClick(row)}>Sửa</Button>
+          <Button variant="danger" size="sm" onClick={() => handleDeleteClick(row)}>Xóa</Button>
         </div>
       ),
     },
