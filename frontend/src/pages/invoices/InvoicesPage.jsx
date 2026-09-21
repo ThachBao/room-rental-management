@@ -17,10 +17,7 @@ import Loading from '../../components/common/Loading';
 import EmptyState from '../../components/common/EmptyState';
 import { INVOICE_STATUS } from '../../constants/invoiceStatus';
 import { PAYMENT_METHOD, PAYMENT_METHOD_LABELS } from '../../constants/paymentMethod';
-import { formatCurrency } from '../../utils/formatCurrency';
-import { formatDate, toLocalISOString } from '../../utils/formatDate';
-import { getErrorMessage } from '../../utils/errorHandler';
-import { Plus, Eye, Edit2, AlertTriangle, FileText, Calendar, User, DollarSign, Trash2, CheckCircle, Banknote } from 'lucide-react';
+import { Plus, Eye, Edit2, AlertTriangle, FileText, Calendar, User, DollarSign, Trash2, CheckCircle, Banknote, Printer } from 'lucide-react';
 
 const filterStatusOptions = [
   { value: 'ALL', label: 'Tất cả trạng thái' },
@@ -306,16 +303,29 @@ export default function InvoicesPage() {
               </div>
 
               {/* Actions Footer */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleDetailClick(invoice)}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px', marginRight: 'auto' }}
-                >
-                  <Eye size={13} />
-                  Chi tiết
-                </Button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleDetailClick(invoice)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px' }}
+                  >
+                    <Eye size={13} />
+                    Chi tiết
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleDetailClick(invoice)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '4px', minHeight: '32px', color: '#0284c7', borderColor: '#bae6fd', backgroundColor: '#f0f9ff', fontWeight: 600 }}
+                  >
+                    <Printer size={13} />
+                    In / Xuất ảnh
+                  </Button>
+                </div>
+
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
 
                 {/* Quick Cash Payment button for Manager */}
                 {(invoice.status === INVOICE_STATUS.UNPAID || invoice.status === INVOICE_STATUS.OVERDUE) && (
@@ -375,6 +385,7 @@ export default function InvoicesPage() {
                     </Button>
                   </>
                 )}
+                </div>
               </div>
             </Card>
           ))}

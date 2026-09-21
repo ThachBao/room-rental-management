@@ -5,13 +5,14 @@ import { INVOICE_STATUS, INVOICE_STATUS_LABELS, INVOICE_STATUS_BADGES } from '..
 import { PAYMENT_METHOD, PAYMENT_METHOD_LABELS } from '../../constants/paymentMethod';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate, formatDateTime, toLocalISOString } from '../../utils/formatDate';
+import { numberToWordsVietnamese } from '../../utils/numberToWordsVietnamese';
 import Button from '../../components/common/Button';
 import Select from '../../components/common/Select';
 import Input from '../../components/common/Input';
 import { uploadApi } from '../../api/uploadApi';
 import { invoiceApi } from '../../api/invoiceApi';
 import { paymentApi } from '../../api/paymentApi';
-import { ExternalLink, CheckCircle, Banknote, Download, Copy, Share2, Sparkles, Building, Calendar, User, Clock, Trash2, Check } from 'lucide-react';
+import { ExternalLink, CheckCircle, Banknote, Download, Copy, Trash2, Check, Printer } from 'lucide-react';
 
 export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDelete }) {
   if (!invoice) return null;
@@ -33,13 +34,14 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
 
   const role = localStorage.getItem('userRole'); // 'admin' or 'tenant'
 
-  // Dynamic fee items filter: only show items with amount > 0
+  // Dynamic fee items: only include items with amount > 0
   const feeItems = [];
 
   if ((invoice.rentAmount ?? 0) > 0) {
     feeItems.push({
-      label: 'Tiền thuê phòng',
-      sub: 'Chi phí thuê phòng cố định theo hợp đồng',
+      name: 'Tiền thuê phòng',
+      qty: '1 Tháng',
+      unitPrice: invoice.rentAmount,
       amount: invoice.rentAmount,
       isDiscount: false,
     });
@@ -47,8 +49,9 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
 
   if ((invoice.electricAmount ?? 0) > 0 || (invoice.electricUsage ?? 0) > 0) {
     feeItems.push({
-      label: 'Tiền điện sử dụng',
-      sub: `Chỉ số: ${invoice.electricUsage ?? 0} kWh × ${formatCurrency(invoice.electricUnitPrice ?? 0)}/kWh`,
+      name: 'Tiền điện sinh hoạt',
+      qty: `${invoice.electricUsage ?? 0} kWh`,
+      unitPrice: invoice.electricUnitPrice ?? 0,
       amount: invoice.electricAmount ?? 0,
       isDiscount: false,
     });
@@ -56,8 +59,9 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
 
   if ((invoice.waterAmount ?? 0) > 0 || (invoice.waterUsage ?? 0) > 0) {
     feeItems.push({
-      label: 'Tiền nước sử dụng',
-      sub: `Chỉ số: ${invoice.waterUsage ?? 0} m³ × ${formatCurrency(invoice.waterUnitPrice ?? 0)}/m³`,
+      name: 'Tiền nước sinh hoạt',
+      qty: `${invoice.waterUsage ?? 0} m³`,
+      unitPrice: invoice.waterUnitPrice ?? 0,
       amount: invoice.waterAmount ?? 0,
       isDiscount: false,
     });
@@ -65,8 +69,9 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
 
   if ((invoice.internetFee ?? 0) > 0) {
     feeItems.push({
-      label: 'Phí mạng Internet',
-      sub: null,
+      name: 'Phí mạng Internet',
+      qty: '1 Tháng',
+      unitPrice: invoice.internetFee,
       amount: invoice.internetFee,
       isDiscount: false,
     });
@@ -74,8 +79,9 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
 
   if ((invoice.trashFee ?? 0) > 0) {
     feeItems.push({
-      label: 'Phí thu gom rác thải',
-      sub: null,
+      name: 'Phí thu gom rác thải',
+      qty: '1 Tháng',
+      unitPrice: invoice.trashFee,
       amount: invoice.trashFee,
       isDiscount: false,
     });
@@ -83,8 +89,9 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
 
   if ((invoice.parkingFee ?? 0) > 0) {
     feeItems.push({
-      label: 'Phí giữ xe máy',
-      sub: null,
+      name: 'Phí giữ xe máy',
+      qty: '1 Tháng',
+      unitPrice: invoice.parkingFee,
       amount: invoice.parkingFee,
       isDiscount: false,
     });
@@ -92,8 +99,9 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
 
   if ((invoice.otherFee ?? 0) > 0) {
     feeItems.push({
-      label: 'Chi phí phát sinh khác',
-      sub: null,
+      name: 'Chi phí phát sinh khác',
+      qty: '1 Lần',
+      unitPrice: invoice.otherFee,
       amount: invoice.otherFee,
       isDiscount: false,
     });
@@ -101,8 +109,9 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
 
   if ((invoice.discountAmount ?? 0) > 0) {
     feeItems.push({
-      label: 'Khuyến mãi / Giảm trừ cước',
-      sub: null,
+      name: 'Khuyến mãi / Giảm trừ cước',
+      qty: '-',
+      unitPrice: null,
       amount: invoice.discountAmount,
       isDiscount: true,
     });
@@ -120,7 +129,7 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
         cacheBust: true,
       });
 
-      const fileName = `Hoa_Don_Phong_${invoice.roomNumber || invoice.rentalId}_Thang_${invoice.billingMonth}.png`;
+      const fileName = `Phieu_Thu_Phong_${invoice.roomNumber || invoice.rentalId}_Thang_${invoice.billingMonth}.png`;
       const link = document.createElement('a');
       link.download = fileName;
       link.href = dataUrl;
@@ -152,12 +161,10 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
         setCopiedToast(true);
         setTimeout(() => setCopiedToast(false), 2500);
       } else {
-        // Fallback to download if ClipboardItem not supported
         handleExportImage();
       }
     } catch (err) {
       console.error('Copy image error:', err);
-      // Fallback
       handleExportImage();
     } finally {
       setExporting(false);
@@ -248,8 +255,8 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
             disabled={exporting}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, minHeight: '34px' }}
           >
-            <Download size={15} />
-            {exporting ? 'Đang xuất ảnh...' : 'Xuất ảnh gửi khách (.PNG)'}
+            <Printer size={15} />
+            {exporting ? 'Đang xuất ảnh...' : 'In / Xuất ảnh biên lai (.PNG)'}
           </Button>
 
           <Button
@@ -273,135 +280,90 @@ export default function InvoiceDetail({ invoice, onClose, onStatusChange, onDele
         </div>
       </div>
 
-      {/* ─── Printable / Exportable Invoice Document (Landscape 2 Columns) ─── */}
-      <div ref={invoiceDocRef} className="invoice-document">
-        {/* Document Header */}
-        <div className="invoice-doc-header">
+      {/* ─── Printable / Exportable Invoice Receipt (Mẫu 1: Bảng Kế Toán Chuẩn) ─── */}
+      <div ref={invoiceDocRef} className="invoice-receipt-paper">
+        {/* Receipt Header */}
+        <div className="receipt-header">
+          <h2 className="receipt-title">PHIẾU THU TIỀN NHÀ</h2>
+          <div className="receipt-subtitle">Kỳ thu: Tháng {invoice.billingMonth}</div>
+        </div>
+
+        {/* 2-Column Meta Info Grid */}
+        <div className="receipt-meta-grid">
           <div>
-            <div className="invoice-brand-subtitle">HỆ THỐNG QUẢN LÝ NHÀ TRỌ & PHÒNG CHO THUÊ</div>
-            <h2 className="invoice-doc-title">HÓA ĐƠN TIỀN NHÀ & TIỆN ÍCH</h2>
-            <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>
-              Kỳ thanh toán: <strong style={{ color: '#0f172a' }}>Tháng {invoice.billingMonth}</strong>
-            </div>
+            <div><strong>Phòng trọ:</strong> Phòng {invoice.roomNumber || invoice.rentalId}</div>
+            <div style={{ marginTop: '4px' }}><strong>Khách thuê:</strong> {invoice.representativeTenantName || '---'}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.05em' }}>MÃ HÓA ĐƠN</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)', fontFamily: 'var(--font-heading)' }}>
-              #HD-{String(invoice.id).padStart(5, '0')}
-            </div>
-            <div style={{ marginTop: '4px' }}>
-              <Badge
-                label={INVOICE_STATUS_LABELS[status] || status}
-                variant={INVOICE_STATUS_BADGES[status] || 'secondary'}
-              />
-            </div>
+            <div><strong>Hạn thanh toán:</strong> {formatDate(invoice.dueDate)}</div>
+            <div style={{ marginTop: '4px' }}><strong>Mã hóa đơn:</strong> #HD-{String(invoice.id).padStart(5, '0')}</div>
           </div>
         </div>
 
-        {/* 4-Column Metadata Banner */}
-        <div className="invoice-meta-banner">
-          <div className="invoice-meta-item">
-            <span className="meta-label">Phòng trọ</span>
-            <span className="meta-val">Phòng {invoice.roomNumber || invoice.rentalId}</span>
-          </div>
-          <div className="invoice-meta-item">
-            <span className="meta-label">Người đại diện</span>
-            <span className="meta-val">{invoice.representativeTenantName || '---'}</span>
-          </div>
-          <div className="invoice-meta-item">
-            <span className="meta-label">Hạn thanh toán</span>
-            <span className="meta-val" style={{ color: '#b91c1c' }}>{formatDate(invoice.dueDate)}</span>
-          </div>
-          <div className="invoice-meta-item">
-            <span className="meta-label">Thời điểm thanh toán</span>
-            <span className="meta-val" style={{ color: invoice.paidAt ? 'var(--success)' : '#64748b' }}>
-              {invoice.paidAt ? formatDateTime(invoice.paidAt) : 'Chưa thu tiền'}
-            </span>
-          </div>
-        </div>
-
-        {/* 2-Column Horizontal Body */}
-        <div className="invoice-horizontal-grid">
-          {/* Left Column: Itemized Service Breakdown */}
-          <div className="invoice-items-card">
-            <div className="invoice-items-header">
-              Chi tiết các khoản phí & tiêu thụ
-            </div>
-            
+        {/* Accounting Data Table */}
+        <table className="receipt-table">
+          <thead>
+            <tr>
+              <th style={{ width: '40px', textAlign: 'center' }}>STT</th>
+              <th style={{ textAlign: 'left' }}>Khoản mục / Dịch vụ</th>
+              <th style={{ width: '130px', textAlign: 'center' }}>Số lượng / Chỉ số</th>
+              <th style={{ width: '120px', textAlign: 'right' }}>Đơn giá (VNĐ)</th>
+              <th style={{ width: '130px', textAlign: 'right' }}>Thành tiền (VNĐ)</th>
+            </tr>
+          </thead>
+          <tbody>
             {feeItems.length === 0 ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '0.875rem' }}>
-                Không có khoản mục phát sinh chi phí nào.
-              </div>
+              <tr>
+                <td colSpan={5} style={{ textAlign: 'center', color: '#64748b', padding: '16px' }}>
+                  Không có khoản mục phát sinh chi phí.
+                </td>
+              </tr>
             ) : (
               feeItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`invoice-item-row ${item.isDiscount ? 'discount-row' : ''}`}
-                >
-                  <div>
-                    <div className="invoice-item-name" style={{ color: item.isDiscount ? '#be123c' : '#1e293b' }}>
-                      {idx + 1}. {item.label}
-                    </div>
-                    {item.sub && <div className="invoice-item-sub">{item.sub}</div>}
-                  </div>
-                  <div
-                    className="invoice-item-amount"
-                    style={{ color: item.isDiscount ? '#be123c' : '#0f172a' }}
-                  >
-                    {item.isDiscount ? `- ${formatCurrency(item.amount)}` : formatCurrency(item.amount)}
-                  </div>
-                </div>
+                <tr key={idx} style={{ backgroundColor: item.isDiscount ? '#fff1f2' : 'transparent' }}>
+                  <td style={{ textAlign: 'center', fontWeight: 600 }}>{idx + 1}</td>
+                  <td style={{ fontWeight: 600, color: item.isDiscount ? '#be123c' : '#1e293b' }}>
+                    {item.name}
+                  </td>
+                  <td style={{ textAlign: 'center', color: '#475569' }}>{item.qty}</td>
+                  <td style={{ textAlign: 'right', color: '#475569' }}>
+                    {item.unitPrice ? formatCurrency(item.unitPrice).replace(' ₫', '') : '-'}
+                  </td>
+                  <td style={{ textAlign: 'right', fontWeight: 700, color: item.isDiscount ? '#be123c' : '#0f172a' }}>
+                    {item.isDiscount ? `- ${formatCurrency(item.amount).replace(' ₫', '')}` : formatCurrency(item.amount).replace(' ₫', '')}
+                  </td>
+                </tr>
               ))
             )}
+          </tbody>
+        </table>
+
+        {/* Total and Words section */}
+        <div className="receipt-total-section">
+          <div className="receipt-total-row">
+            <span>TỔNG CỘNG THANH TOÁN:</span>
+            <span className="receipt-total-amount">{formatCurrency(invoice.totalAmount)}</span>
           </div>
-
-          {/* Right Column: Total Summary & Payment Instructions */}
-          <div className="invoice-summary-panel">
-            {/* Total Amount Box */}
-            <div className="invoice-amount-box">
-              <div className="amount-label">TỔNG TIỀN CẦN THANH TOÁN</div>
-              <h1 className="amount-num">{formatCurrency(invoice.totalAmount)}</h1>
-              <div style={{ fontSize: '0.75rem', opacity: 0.85, marginTop: '6px' }}>
-                Hạn chót: {formatDate(invoice.dueDate)}
-              </div>
-            </div>
-
-            {/* Note if available */}
-            {invoice.note && (
-              <div className="invoice-note-box">
-                <strong style={{ color: '#0f172a' }}>Ghi chú:</strong> {invoice.note}
-              </div>
-            )}
-
-            {/* Payment advice message */}
-            <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 'var(--radius-md)', padding: '12px 14px', fontSize: '0.8rem', color: '#166534', lineHeight: 1.5 }}>
-              <div style={{ fontWeight: 700, marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Sparkles size={14} /> Hướng dẫn nộp tiền
-              </div>
-              Quý khách vui lòng thanh toán đúng hạn trước ngày <strong>{formatDate(invoice.dueDate)}</strong> bằng tiền mặt cho quản lý hoặc chuyển khoản ngân hàng.
-            </div>
-
-            {/* Receipt image preview if already paid/submitted */}
-            {receiptUrl && (
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: 'var(--radius-md)', padding: '10px 12px', backgroundColor: '#f8fafc' }}>
-                <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '6px' }}>
-                  Chứng từ thanh toán đính kèm:
-                </span>
-                <div style={{ position: 'relative', width: '100%', height: '110px', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
-                  <img src={receiptUrl} alt="Receipt" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <a href={receiptUrl} target="_blank" rel="noreferrer" style={{ position: 'absolute', bottom: '4px', right: '4px', backgroundColor: 'rgba(0,0,0,0.65)', color: '#fff', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}>
-                    <ExternalLink size={12} /> Xem ảnh gốc
-                  </a>
-                </div>
-              </div>
-            )}
+          <div className="receipt-words-row">
+            <strong>Bằng chữ:</strong> {numberToWordsVietnamese(invoice.totalAmount)}
           </div>
+          {invoice.note && (
+            <div style={{ marginTop: '8px', fontSize: '0.825rem', color: '#475569' }}>
+              <strong>Ghi chú:</strong> {invoice.note}
+            </div>
+          )}
         </div>
 
-        {/* Document Footer */}
-        <div className="invoice-footer-msg">
-          <span>Xin chân thành cảm ơn quý khách đã tin tưởng và đồng hành cùng nhà trọ!</span>
-          <span>Ngày in: {formatDate(new Date())}</span>
+        {/* Signatures */}
+        <div className="receipt-signatures">
+          <div className="receipt-sign-box">
+            <div className="receipt-sign-title">NGƯỜI NỘP TIỀN</div>
+            <div className="receipt-sign-hint">(Ký, ghi rõ họ tên)</div>
+          </div>
+          <div className="receipt-sign-box">
+            <div className="receipt-sign-title">NGƯỜI LẬP PHIẾU</div>
+            <div className="receipt-sign-hint">(Ký, ghi rõ họ tên)</div>
+          </div>
         </div>
       </div>
 
