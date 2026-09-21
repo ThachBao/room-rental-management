@@ -463,11 +463,12 @@ export default function InvoicesPage() {
         />
       </Modal>
 
-      {/* Detail Modal (Bottom Sheet on mobile) */}
+      {/* Detail Modal */}
       <Modal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         title="Chi tiết hóa đơn tiền phòng & dịch vụ"
+        size="lg"
       >
         <InvoiceDetail
           invoice={selectedInvoice}

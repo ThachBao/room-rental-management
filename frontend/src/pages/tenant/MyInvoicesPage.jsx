@@ -124,11 +124,12 @@ export default function MyInvoicesPage() {
         </div>
       )}
 
-      {/* Invoice Detail Modal (acts as Bottom Sheet on mobile) */}
+      {/* Invoice Detail Modal */}
       <Modal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         title={`Hóa đơn Tháng ${selectedInvoice?.billingMonth || ''}`}
+        size="lg"
       >
         {selectedInvoice && (
           <InvoiceDetail

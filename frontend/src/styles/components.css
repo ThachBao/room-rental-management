@@ -385,6 +385,22 @@
   animation: slideUp var(--transition-normal);
 }
 
+.modal-content.modal-sm {
+  max-width: 420px;
+}
+
+.modal-content.modal-md {
+  max-width: 580px;
+}
+
+.modal-content.modal-lg {
+  max-width: 860px;
+}
+
+.modal-content.modal-xl {
+  max-width: 1040px;
+}
+
 .modal-header {
   display: flex;
   align-items: center;

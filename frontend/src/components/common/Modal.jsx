@@ -1,11 +1,11 @@
 import React from 'react';
 
-export default function Modal({ isOpen, onClose, title, children, footer }) {
+export default function Modal({ isOpen, onClose, title, children, footer, size = 'md' }) {
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className={`modal-content modal-${size}`} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>{title}</h3>
           <button className="modal-close" onClick={onClose}>
@@ -24,4 +24,3 @@ export default function Modal({ isOpen, onClose, title, children, footer }) {
     </div>
   );
 }
-// 
