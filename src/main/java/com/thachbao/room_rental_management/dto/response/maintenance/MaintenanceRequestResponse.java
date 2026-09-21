@@ -1,5 +1,6 @@
 package com.thachbao.room_rental_management.dto.response.maintenance;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.thachbao.room_rental_management.enums.MaintenancePriority;
 import com.thachbao.room_rental_management.enums.MaintenanceStatus;
 import lombok.*;
@@ -25,7 +26,13 @@ public class MaintenanceRequestResponse {
     private MaintenanceStatus status;
     private String resolvedNote;
     private BigDecimal repairCost;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime resolvedAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime updatedAt;
 }

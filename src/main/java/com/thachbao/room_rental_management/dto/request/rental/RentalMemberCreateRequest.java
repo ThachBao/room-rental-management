@@ -20,6 +20,7 @@ public class RentalMemberCreateRequest {
     private RentalMemberRole memberRole;
 
     @NotNull(message = "Ngày chuyển vào không được để trống")
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd", shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private LocalDate moveInDate;
 
     private String note;

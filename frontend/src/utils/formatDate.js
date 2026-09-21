@@ -58,15 +58,26 @@ export const formatDateTime = (dateTimeStr) => {
 
 export const toLocalDateString = (date) => {
   if (!date) return '';
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}/.test(date)) {
+    return date.substring(0, 10);
+  }
   const d = new Date(date);
-  const tzOffset = d.getTimezoneOffset() * 60000;
-  return new Date(d - tzOffset).toISOString().substring(0, 10);
+  if (isNaN(d.getTime())) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 export const toLocalISOString = (date) => {
   if (!date) return '';
   const d = new Date(date);
-  const tzOffset = d.getTimezoneOffset() * 60000;
-  return new Date(d - tzOffset).toISOString().substring(0, 16);
+  if (isNaN(d.getTime())) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 

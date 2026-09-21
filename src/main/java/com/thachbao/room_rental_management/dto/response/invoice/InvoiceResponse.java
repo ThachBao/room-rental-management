@@ -1,5 +1,6 @@
 package com.thachbao.room_rental_management.dto.response.invoice;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.thachbao.room_rental_management.enums.InvoiceStatus;
 import lombok.*;
 
@@ -35,11 +36,20 @@ public class InvoiceResponse {
     private BigDecimal otherFee;
     private BigDecimal discountAmount;
     private BigDecimal totalAmount;
+
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate dueDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime paidAt;
+
     private InvoiceStatus status;
     private String note;
     private String receiptImageUrl;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime updatedAt;
 }

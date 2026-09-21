@@ -1,5 +1,6 @@
 package com.thachbao.room_rental_management.dto.request.rental;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +21,10 @@ public class RoomRentalCreateRequest {
     private Long representativeTenantId;
 
     @NotNull(message = "Ngày bắt đầu thuê không được để trống")
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate startDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate expectedEndDate;
 
     @NotNull(message = "Tiền thuê tháng không được để trống")
@@ -36,6 +39,7 @@ public class RoomRentalCreateRequest {
     @DecimalMin(value = "0.0", message = "Tiền cọc đã trả phải lớn hơn hoặc bằng 0")
     private BigDecimal depositPaidAmount;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime depositPaidAt;
 
     private String depositNote;

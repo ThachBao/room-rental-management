@@ -29,6 +29,7 @@ public class TenantUpdateRequest {
     private String identityNumber;
 
     @Past(message = "Ngày sinh phải nhỏ hơn ngày hiện tại")
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd", shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private LocalDate dateOfBirth;
 
     @Size(max = 255, message = "Địa chỉ không được vượt quá 255 ký tự")

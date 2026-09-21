@@ -1,12 +1,12 @@
 package com.thachbao.room_rental_management.dto.response.tenant;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Locale;
 
 /*
  * Response DTO là dữ liệu API trả về cho frontend/Postman.
@@ -34,6 +34,7 @@ public class TenantResponse {
 
     private String identityNumber;
 
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate dateOfBirth;
 
     private String address;
@@ -42,7 +43,9 @@ public class TenantResponse {
 
     private String emergencyContactPhone;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime updatedAt;
 }

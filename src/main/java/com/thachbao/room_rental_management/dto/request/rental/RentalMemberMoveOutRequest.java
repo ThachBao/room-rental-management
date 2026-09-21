@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Setter
 public class RentalMemberMoveOutRequest {
     @NotNull(message = "Ngày chuyển ra không được để trống")
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd", shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private LocalDate moveOutDate;
 
     private String note;

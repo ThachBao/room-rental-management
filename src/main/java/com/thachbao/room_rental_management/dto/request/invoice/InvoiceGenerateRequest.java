@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -21,6 +22,7 @@ public class InvoiceGenerateRequest {
     private String billingMonth;
 
     @NotNull(message = "Hạn thanh toán không được để trống")
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate dueDate;
 
     @DecimalMin(value = "0.0", message = "Phí khác không được âm")
