@@ -23,7 +23,6 @@ public class PaymentRequest {
     private PaymentMethod paymentMethod;
 
     @NotNull(message = "Ngày thanh toán không được để trống")
-    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private LocalDateTime paymentDate;
 
     private Long receivedByUserId;

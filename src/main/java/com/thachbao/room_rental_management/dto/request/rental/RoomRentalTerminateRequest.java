@@ -24,7 +24,6 @@ public class RoomRentalTerminateRequest {
     @DecimalMin(value = "0.0", message = "Tiền cọc hoàn trả phải lớn hơn hoặc bằng 0")
     private BigDecimal depositReturnAmount;
 
-    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private LocalDateTime depositReturnedAt;
 
     private String depositNote;

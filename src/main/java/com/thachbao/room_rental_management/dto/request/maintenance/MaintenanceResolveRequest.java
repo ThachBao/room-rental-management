@@ -19,6 +19,5 @@ public class MaintenanceResolveRequest {
     @DecimalMin(value = "0.0", message = "Chi phí sửa chữa không được âm")
     private BigDecimal repairCost;
 
-    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING)
     private LocalDateTime resolvedAt;
 }

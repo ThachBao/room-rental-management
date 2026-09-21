@@ -39,7 +39,6 @@ public class RoomRentalCreateRequest {
     @DecimalMin(value = "0.0", message = "Tiền cọc đã trả phải lớn hơn hoặc bằng 0")
     private BigDecimal depositPaidAmount;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime depositPaidAt;
 
     private String depositNote;
